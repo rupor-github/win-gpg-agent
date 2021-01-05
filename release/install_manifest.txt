@@ -1,4 +1,0 @@
-/home/rupor/projects/github.com/rupor-github/win-gpg-agent/bin/changelog.txt
-/home/rupor/projects/github.com/rupor-github/win-gpg-agent/bin/agent-gui.exe
-/home/rupor/projects/github.com/rupor-github/win-gpg-agent/bin/pinentry.exe
-/home/rupor/projects/github.com/rupor-github/win-gpg-agent/bin/sorelay.exe
