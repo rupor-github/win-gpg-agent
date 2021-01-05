@@ -193,31 +193,36 @@ In my .bashrc I detect what I have and where it runs using code like this:
         fi
     elif [ ${ISWSL} -eq 2 ]; then
         # WSL 2 require socat to create socket on Linux side and sorelay on the Windows side to interop
-        if [ -n ${WIN_GNUPG_HOME} ]; then
-            # setup gpg-agent socket
-            GPG_SOCK=${HOME}/.gnupg/S.gpg-agent
-            ss -a | grep -q ${GPG_SOCK}
-            if [ $? -ne 0  ]; then
-                rm -f ${GPG_SOCK}
-                ( setsid socat UNIX-LISTEN:${GPG_SOCK},fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a ${WIN_GNUPG_HOME//\:/\\:}/S.gpg-agent",nofork & ) >/dev/null 2>&1
-            fi
-            # setup gpg-agent.extra socket
-            GPG_SOCK_EXTRA=${HOME}/.gnupg/S.gpg-agent.extra
-            ss -a | grep -q ${GPG_SOCK_EXTRA}
-            if [ $? -ne 0  ]; then
-                rm -f ${GPG_SOCK}
-                ( setsid socat UNIX-LISTEN:${GPG_SOCK_EXTRA},fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a ${WIN_GNUPG_HOME//\:/\\:}/S.gpg-agent.extra",nofork & ) >/dev/null 2>&1
-            fi
-        fi
-        if [ -n ${WIN_AGENT_HOME} ]; then
-            # and ssh-agent socket
-            export SSH_AUTH_SOCK=${HOME}/.gnupg/S.gpg-agent.ssh
-            ss -a | grep -q ${SSH_AUTH_SOCK}
-            if [ $? -ne 0  ]; then
-                rm -f ${SSH_AUTH_SOCK}
-                ( setsid socat UNIX-LISTEN:${SSH_AUTH_SOCK},fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe ${WIN_AGENT_HOME//\:/\\:}/S.gpg-agent.ssh",nofork & ) >/dev/null 2>&1
-            fi
-        fi
+		if [ ! -d ${HOME}/.gnupg ]; then
+			mkdir ${HOME}/.gnupg
+			chmod 0700 ${HOME}/.gnupg
+		fi
+		if [ -n ${WIN_GNUPG_HOME} ]; then
+			# setup gpg-agent socket
+			_sock_name=${HOME}/.gnupg/S.gpg-agent
+			ss -a | grep -q ${_sock_name}
+			if [ $? -ne 0  ]; then
+				rm -f ${_sock_name}
+				( setsid socat UNIX-LISTEN:${_sock_name},fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a ${WIN_GNUPG_HOME//\:/\\:}/S.gpg-agent",nofork & ) >/dev/null 2>&1
+			fi
+			# setup gpg-agent.extra socket
+			_sock_name=${HOME}/.gnupg/S.gpg-agent.extra
+			ss -a | grep -q ${_sock_name}
+			if [ $? -ne 0  ]; then
+				rm -f ${_sock_name}
+				( setsid socat UNIX-LISTEN:${_sock_name},fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a ${WIN_GNUPG_HOME//\:/\\:}/S.gpg-agent.extra",nofork & ) >/dev/null 2>&1
+			fi
+			unset _sock_name
+		fi
+		if [ -n ${WIN_AGENT_HOME} ]; then
+			# and ssh-agent socket
+			export SSH_AUTH_SOCK=${HOME}/.gnupg/S.gpg-agent.ssh
+			ss -a | grep -q ${SSH_AUTH_SOCK}
+			if [ $? -ne 0  ]; then
+				rm -f ${SSH_AUTH_SOCK}
+				( setsid socat UNIX-LISTEN:${SSH_AUTH_SOCK},fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe ${WIN_AGENT_HOME//\:/\\:}/S.gpg-agent.ssh",nofork & ) >/dev/null 2>&1
+			fi
+		fi
     else
         # Do whatever -- this is real Linux
     fi
