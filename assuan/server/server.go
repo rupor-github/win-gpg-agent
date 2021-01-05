@@ -7,7 +7,7 @@ import (
 	"os"
 	"regexp"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 // CommandHandler is an alias for command handler function type.

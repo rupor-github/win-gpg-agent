@@ -20,8 +20,8 @@ import (
 	"github.com/lxn/win"
 	"golang.org/x/sys/windows"
 
-	"win-gpg-agent/assuan/client"
-	"win-gpg-agent/util"
+	"github.com/rupor-github/win-gpg-agent/assuan/client"
+	"github.com/rupor-github/win-gpg-agent/util"
 )
 
 type ConnectorType int

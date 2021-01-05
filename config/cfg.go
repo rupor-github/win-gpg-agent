@@ -9,7 +9,7 @@ import (
 
 	ucfg "go.uber.org/config"
 
-	"win-gpg-agent/util"
+	"github.com/rupor-github/win-gpg-agent/util"
 )
 
 type GPGConfig struct {

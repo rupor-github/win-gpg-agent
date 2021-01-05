@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 func TestInquire(t *testing.T) {

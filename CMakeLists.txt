@@ -59,7 +59,7 @@ endif()
 # Project version number
 set(PRJ_VERSION_Major "1")
 set(PRJ_VERSION_Minor "0")
-set(PRJ_VERSION_Patch "0")
+set(PRJ_VERSION_Patch "1")
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/.git" AND IS_DIRECTORY "${PROJECT_SOURCE_DIR}/.git")
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/cmake/githash.sh ${GIT_EXECUTABLE}
@@ -114,7 +114,7 @@ add_custom_target(bin_agent ALL
         ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
         -ldflags='-H=windowsgui'
         ${GO_MOD_ARGS}
-        win-gpg-agent/cmd/agent
+        ./cmd/agent
     COMMENT "Building agent-gui..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 install(PROGRAMS ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX} DESTINATION ${DEST_DIR} CONFIGURATIONS Release)
@@ -134,7 +134,7 @@ add_custom_target(bin_pinentry ALL
     COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH}
         ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
         ${GO_MOD_ARGS}
-        win-gpg-agent/cmd/pinentry
+        ./cmd/pinentry
     COMMENT "Building pinentry..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 install(PROGRAMS ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX} DESTINATION ${DEST_DIR} CONFIGURATIONS Release)
@@ -154,7 +154,7 @@ add_custom_target(bin_sorelay ALL
     COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH}
         ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
         ${GO_MOD_ARGS}
-        win-gpg-agent/cmd/sorelay
+        ./cmd/sorelay
     COMMENT "Building sorelay..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 install(PROGRAMS ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX} DESTINATION ${DEST_DIR} CONFIGURATIONS Release)

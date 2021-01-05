@@ -14,11 +14,11 @@ import (
 	"github.com/pborman/getopt/v2"
 	clip "github.com/rupor-github/gclpr/server"
 
-	"win-gpg-agent/agent"
-	"win-gpg-agent/config"
-	"win-gpg-agent/misc"
-	"win-gpg-agent/systray"
-	"win-gpg-agent/util"
+	"github.com/rupor-github/win-gpg-agent/agent"
+	"github.com/rupor-github/win-gpg-agent/config"
+	"github.com/rupor-github/win-gpg-agent/misc"
+	"github.com/rupor-github/win-gpg-agent/systray"
+	"github.com/rupor-github/win-gpg-agent/util"
 )
 
 var (

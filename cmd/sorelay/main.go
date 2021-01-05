@@ -11,10 +11,10 @@ import (
 
 	"github.com/pborman/getopt/v2"
 
-	"win-gpg-agent/assuan/client"
-	"win-gpg-agent/config"
-	"win-gpg-agent/misc"
-	"win-gpg-agent/util"
+	"github.com/rupor-github/win-gpg-agent/assuan/client"
+	"github.com/rupor-github/win-gpg-agent/config"
+	"github.com/rupor-github/win-gpg-agent/misc"
+	"github.com/rupor-github/win-gpg-agent/util"
 )
 
 var (

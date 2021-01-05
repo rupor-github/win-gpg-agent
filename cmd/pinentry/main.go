@@ -13,12 +13,12 @@ import (
 	"github.com/pborman/getopt/v2"
 	"golang.org/x/sys/windows"
 
-	"win-gpg-agent/assuan/common"
-	"win-gpg-agent/config"
-	"win-gpg-agent/misc"
-	"win-gpg-agent/pinentry"
-	"win-gpg-agent/util"
-	"win-gpg-agent/wincred"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/config"
+	"github.com/rupor-github/win-gpg-agent/misc"
+	"github.com/rupor-github/win-gpg-agent/pinentry"
+	"github.com/rupor-github/win-gpg-agent/util"
+	"github.com/rupor-github/win-gpg-agent/wincred"
 )
 
 var (

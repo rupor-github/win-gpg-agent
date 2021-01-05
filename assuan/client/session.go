@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 // LibAssaun file socket on Windows - read contents of the target file and connect to a TCP port

@@ -3,7 +3,7 @@ package server
 import (
 	"log"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 // Inquire requests data with specified keywords from client.

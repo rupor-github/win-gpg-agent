@@ -1,4 +1,4 @@
-module win-gpg-agent
+module github.com/rupor-github/win-gpg-agent
 
 go 1.15
 

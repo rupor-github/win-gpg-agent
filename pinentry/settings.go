@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 type Options struct {

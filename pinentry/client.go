@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	assuan "win-gpg-agent/assuan/client"
-	"win-gpg-agent/assuan/common"
+	assuan "github.com/rupor-github/win-gpg-agent/assuan/client"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 type Client struct {

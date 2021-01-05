@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"win-gpg-agent/assuan/common"
-	"win-gpg-agent/assuan/server"
-	"win-gpg-agent/wincred"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/server"
+	"github.com/rupor-github/win-gpg-agent/wincred"
 )
 
 var version = "undefined"

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 func TestPipe_ReadLine(t *testing.T) {

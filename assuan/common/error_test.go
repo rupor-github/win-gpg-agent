@@ -3,7 +3,7 @@ package common_test
 import (
 	"testing"
 
-	"win-gpg-agent/assuan/common"
+	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
 func TestSplitErrCode(t *testing.T) {
