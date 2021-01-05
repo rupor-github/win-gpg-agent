@@ -1,0 +1,7 @@
+# Hashes of file build rules.
+65f812cc94036a9d5d6910e5d7bca795 ../cmd/agent/resources.syso
+d4be08b752cab34abfac666dd1ba34f0 ../cmd/pinentry/resources.syso
+c0eec89b0aee07710a6b63809680cc83 ../cmd/sorelay/resources.syso
+e333bbacdef7ba3dfc3d814cb528bd4a CMakeFiles/bin_agent
+768cced03f25ae08997ec71b053623c7 CMakeFiles/bin_pinentry
+034211c40326918f38a2d968a94b7a66 CMakeFiles/bin_sorelay

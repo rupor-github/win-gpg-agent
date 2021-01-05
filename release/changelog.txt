@@ -1,0 +1,40 @@
+
+. / 2021-01-04
+==============
+
+  * another
+  * another one
+  * another one
+  * docs
+  * small fix
+  * path
+  * More env. vars
+  * More env. vars
+  * More env. vars
+  * More env. vars
+  * more
+  * more
+  * more
+  * more
+  * more
+  * more
+  * more
+  * more
+  * picture
+  * picture
+  * picture
+  * 1.0.0 ready?
+  * Added gclpr backend and status print
+  * Cleaning build
+  * Correcting config path
+  * Added sorelay - first cut
+  * wip
+  * wip
+  * Cleanup and linting
+  * Normalizing debug output
+  * Cleanup: unifying argument parsing and cleaning wincred
+  * WIP: pinentry - fist cut is working
+  * WIP: pipe and socket redirection is working
+  * Ranaming
+  * Fixing scripts permissions
+  * WIP: skeleton is ready

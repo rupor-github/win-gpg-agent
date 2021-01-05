@@ -1,0 +1,8 @@
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/install/local.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/install.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/list_install_components.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/rebuild_cache.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/edit_cache.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/bin_sorelay.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/bin_pinentry.dir
+/home/rupor/projects/github.com/rupor-github/win-gpg-agent/release/CMakeFiles/bin_agent.dir

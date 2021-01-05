@@ -1,0 +1,20 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+*.test
+*.prof
+*.mprof
+*.log
+*.7z
+*.syso
+
+build/
+bin/
+
+# build specific
+misc/version.go
+cmd/*/resources.rc
+cmd/*/manifest.xml
