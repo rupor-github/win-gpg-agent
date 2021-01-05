@@ -9,13 +9,15 @@
     <hr>
 </p>
 
-Windows 10 has `ssh-agent` service (with support for persistence and Windows security) and I have been using it successfully - see my [wsl-ssh-agent project](https:/github.com/rupor-github/wsl-ssh-agent). However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It supports smart cards, attempts to handle identity aspects and sometimes must be used (for example to sign git commits on some projects). It also provides ssh-agent functionality with somewhat more flexibility. All of that works reasonably well on Linux. As usual Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows 10 (console, terminal and all), WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of keys (SSH and GPG) and provide interfaces transparently available to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
+Windows 10 has `ssh-agent` service (with support for persistence and Windows security) and I have been using it successfully - see my [wsl-ssh-agent project](https:/github.com/rupor-github/wsl-ssh-agent). However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It supports smart cards, attempts to handle identity aspects and sometimes must be used (for example to sign git commits on some projects). It also provides ssh-agent functionality with somewhat more flexibility. All of that works reasonably well on Linux. As usual Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows 10 (console, terminal and all), WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
 
-**DISCLAIMER** When using term `GnuPG` I am **not referring** to [GPG4Win](https://gpg4win.org), but rather to basic GnuPG tools built from code base common for all platforms. GPG4Win includes this set (which could be extracted), but normally it is available from GnuPG ftp site [ftp://ftp.gnupg.org](ftp://ftp.gnupg.org/gcrypt/binary/). It also could be installed by using [chocolatey](https://chocolatey.org/) command `choco install gnupg`. So no wonderful KDE GUIs ported to Windows. I am still learning the full scope of damage one could cause by using GnuPG tools and I am certainly no expert here.
+**DISCLAIMER** When using term `GnuPG` I am **not referring** to [GPG4Win](https://gpg4win.org), but rather to basic GnuPG tools built from code base common for all platforms. GPG4Win includes this set (which could be extracted), but normally it is available from GnuPG ftp site [ftp://ftp.gnupg.org](ftp://ftp.gnupg.org/gcrypt/binary/). It also could be installed by using [chocolatey](https://chocolatey.org/) command `choco install gnupg`. So no wonderful KDE GUIs ported to Windows. 
+
+I am still learning the full scope of damage one could cause by using GnuPG tools and I am certainly no expert here.
 
 If you are interested in basic guides on how to handle keys using GnuPG tools - web is full of them and this project has nothing to do with it. [This one](https://insight.o-o.studio/article/setting-up-gpg.html#signing-keys) is very good (albeit somewhat outdated). You could (and probably should) read set of excellent posts by Simon Josefsson: [blog_1](https://blog.josefsson.org/2014/06/23/offline-gnupg-master-key-and-subkeys-on-yubikey-neo-smartcard/) [blog_2](https://blog.josefsson.org/2019/03/21/offline-ed25519-openpgp-key-with-subkeys-on-fst-01g-running-gnuk/) [blog_3](https://blog.josefsson.org/2019/06/21/openpgp-smartcard-under-gnome-on-debian-10-buster/). To put things in perspective and select more practical place for PGP tools overall I strongly suggest studying [this critique](https://latacora.micro.blog/2019/07/16/the-pgp-problem.html). It resonates a lot, especially after spending some time reading GnuPG code.
 
-**NOTE** Eventually many pieces of functionality from this project will become obsolete. I am sure that `gpg-agent` on Windows will directly support Windows OpenSSH server - [T3883](https://dev.gnupg.org/T3883). Microsoft developers will finally decide how they want to handle security on Unix domain sockets and will change [OpenSSH port](https://github.com/PowerShell/openssh-portable.git) and many other wonderful things will happen. Until then we need to create specific translation layers to compensate for deficiencies. Assuan `S.gpg-agent.ssh` support in GnuPG code is presently broken under Windows (at least in GnuPG 2.2.25), so we have to resort to putty/pageant method instead (which today does not work in 64 bits GnuPG builds). And WSL2 requires additional layer of translation (with `socat` on Linux side and either HYPER-V integration service or specific helper on Windows end) since AF_UNIX interop is not (yet? ever?) implemented.
+**NOTE** Eventually many pieces of functionality from this project will become obsolete. I am sure that `gpg-agent` on Windows will directly support Windows OpenSSH server - [T3883](https://dev.gnupg.org/T3883). Microsoft developers will finally decide how they want to handle security on Unix domain sockets and will change [OpenSSH port](https://github.com/PowerShell/openssh-portable.git) and many other wonderful things will happen. Until then we need to create specific translation layers to compensate for deficiencies. Assuan `S.gpg-agent.ssh` support in GnuPG code is presently broken under Windows (at least in GnuPG 2.2.25), so we have to resort to putty/pageant method instead (which today does not work in 64 bits GnuPG builds). And WSL2 requires additional layer of translation (with `socat` on Linux side and either HYPER-V integration service or helper on Windows end) since AF_UNIX interop is not (yet? ever?) implemented for WSL2.
 
 **SECURITY NOTICE:** All the usual security caveats applicable to WSL, SSH and GPG apply here. For example all interaction with the Win32 world happens with the credentials of the user who started the WSL environment. In practice, *if you allow someone else to log in to your WSL environment remotely, they may be able to access the SSH keys stored in
 your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of what you're doing, do not allow remote access to your WSL environment (i.e. by starting an SSH server).
@@ -40,7 +42,9 @@ Download from the [releases page](https://github.com/rupor-github/win-gpg-agent/
 
 Here is a diagram to show simplified relationship between parts: ![protocol](docs/pic1.png)
 
-Unfortunately due to environment complexity it is difficult to provide simple step-by-step guide. I will try to explain what each piece does (as they could be used separately from each other) and then provide an example setup. There are presently 3 executables included in the set: `agent-gui.exe`, `pinentry.exe` and `sorelay.exe`
+Unfortunately due to environment complexity it is difficult to provide simple step-by-step guide. I will try to explain what each piece does (as they could be used separately from each other) and then provide an example setup.
+
+There are presently 3 executables included in the set: `agent-gui.exe`, `pinentry.exe` and `sorelay.exe`
 
 ### agent-gui.exe
 
@@ -56,9 +60,19 @@ Usage: agent-gui.exe [-dh] [-c path]
  -h, --help         Show help
 ```
 
-Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime management - when started it will attempt to locate GnuPG installation and start gpg-agent with "proper" command line parameters. For example it will make sure that gpg-agent will use `pinentry.exe` for the same directory where agent-gui.exe is. It will make sure that it functions by communicating with it. Then It will create AF_UNIX socket counterparts for Assuan sockets from gpg-agent (except "browser" and "ssh" ones). I have no use for "browser" and S.gpg-agent.ssh presently does not work on Windows, so it's AF_UNIX variant will be using pageant protocol to communicate with gpg-agent instead. Named pipe for Windows native OpenSSH will be created using pageant protocol allowing Windows tool to function. Agent-gui will register several environment variables to simplify further usage. On Windows end it will create `SSH_AUTH_SOCK` and set it with proper pipe name and it will create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME` and `WIN_AGENT_HOME`, `WSL_AGENT_HOME` variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation if necessary (basically WSL_* would be paths on the Linux side and WIN_* are Windows ones). This way every WSL environment started after will have proper "unix" path to those directories available for easy scripting. In addition agent-gui could serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) - remote clipboard tool. 
+Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime management. When started it will
+- attempt to locate GnuPG installation and start gpg-agent with "proper" command line parameters.
+- make sure that gpg-agent will use `pinentry.exe` from the same directory where agent-gui.exe is.
+- make sure that it functions by communicating with it.
+- create AF_UNIX socket counterparts for Assuan sockets from gpg-agent (except "browser" and "ssh" ones) and handle translation. I have no use for "browser" and S.gpg-agent.ssh presently does not work on Windows.
+- create and service named pipe for Windows native OpenSSH. Note, that both ssh AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
+- set environment variable `SSH_AUTH_SOCK` on Windows side and set it with proper pipe name so native OpenSSH tools know where to go.
+- create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME`, `WIN_AGENT_HOME`, `WSL_AGENT_HOME` environment variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation. Basically WSL_* would be paths on the Linux side and WIN_* are Windows ones. This way every WSL environment started after will have proper "unix" and "windows" paths available for easy scripting.
+- serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool.
 
-You could always see what is going on by clicking "Status" on applet's menu: ![protocol](docs/pic2.png)
+You could always see what is going on by clicking "Status" on applet's menu:
+
+![protocol](docs/pic2.png)
 
 Reasonable defaults are provided (but could be changed by using configuration file). Full path to configuration file could be provided on command line. If not program will look for `agent-gui.conf` in the same directory where executable is. It is YAML file with following defaults:
 
@@ -107,7 +121,9 @@ Usage: pinentry.exe [-dh] [-c path] [--version]
      --version      Show version information
 ```
 
-It is pretty mundane pinentry implementation, I tried to follow everything I could find from GnuPG documentation and pinentry-w32 code. Since it is using WIndows Credentials API to show GETPIN dialogs a lot of "visuals" from pinentry protocol are either useless or cannot be easily implemented. I think it could be used as pinentry replacement on Windows even without agent-gui (for example to be called from WSL gpg if you decide to keep your vault there and ignore WIndows GnuPG completely) to show proper GUI dialogs:
+It is pretty mundane pinentry implementation, I tried to follow everything I could find from GnuPG documentation and pinentry code. Since it is using WIndows Credentials API to show GETPIN dialogs a lot of "visuals" from pinentry protocol are either useless or cannot be easily implemented (timeouts, display settings etc).
+
+I think it could be used as pinentry replacement on Windows even without agent-gui (for example to be called from WSL gpg if you decide to keep your vault there and ignore WIndows GnuPG completely) to show proper GUI dialogs:
 
 ![protocol](docs/pic4.png) ![protocol](docs/pic5.png)
 
@@ -127,7 +143,7 @@ gui:
 ```
 
 * `gui.debug` - turn on debug logging. Uses `OutputDebugStringW` - use Sysinternals [debugview](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see
-* `gui.pindialog.*` - since gpg-agent starts pinentry which in turn calls Windows APIs to show various dialogs often due to the timing resulting dialog could be left in the background. Those parameters specify artificial delay and name/class for window to be attempted to be brought into foreground forcefully
+* `gui.pindialog.*` - since gpg-agent starts pinentry which in turn calls Windows APIs to show various dialogs often due to the timing resulting dialog could be left in the background. Those parameters specify artificial delay and name/class for window to be attempted to be brought into foreground forcefully.
 
 ### sorelay.exe
 
@@ -144,7 +160,7 @@ Usage: sorelay.exe [-adh] [-c path] [--version] path-to-socket
      --version      Show version information
 ```
 
-This is helper program along the lines of [npiperelay.exe](https://github.com/jstarks/npiperelay). Put it somewhere on devfs for interop to work its magic and combine with socat on WSL2 side and you could easily convert both Assuan and AF_UNIX sockets from windows end into proper sockets on WSL2 end.
+This is helper program along the lines of John Starks' [npiperelay.exe](https://github.com/jstarks/npiperelay). Put it somewhere on devfs for interop to work its magic and combine with socat on WSL2 side and you could easily convert both Windows Assuan and Windows AF_UNIX sockets into sockets on WSL2 Linux end.
 
 As an example (with proper path) following will translate Windows side Assuan socket:
 ```
@@ -155,6 +171,7 @@ And this (with proper path) will translate Windows side AF_UNIX socket:
 ```
 ( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe c:/Users/mike0/AppData/Local/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
 ```
+You *really* have to be on WSL2 in order for this to work - if you see errors like `Cannot open netlink socket: Protocol not supported` - you probably are under WSL1 and should just use AF_UNIX sockets directly. Run `wsl.exe -l --all -v` to check what is going on. When on WSL2 make sure that socat is installed and sorelay.exe is on windows partition and path is right.
 
 Configuration file is never needed, but just in case full path to configuration file could be provided on command line. If not program will look for `sorelay.conf` in the same directory where executable is. It is YAML file with following defaults:
 
@@ -163,15 +180,13 @@ gui:
   debug: false
 ```
 
-You *really* have to be on WSL2 in order for this to work - if you see errors like `Cannot open netlink socket: Protocol not supported` - you probably are under WSL1 and should just use AF_UNIX sockets directly. Run `wsl.exe -l --all -v` to check what is going on. When on WSL2 make sure that socat is installed and sorelay.exe is on windows partition and path is right.
-
 ## Example
 
 Putting it all together nicely - `remote` here refers to your wsl shell or some other box or virtual machine you could `ssh` to. Goal here is to have a setup which could be used the same way in different Linux instance with minimal changes and customization - be it native Linux install, something I ssh into or WSL distro running. We should be able to use a small set of safely stored private keys and be able to forward both gpg and ssh everywhere with minimal complexity (at least it should be manageable).
 
 For my WSL installations I always create `~/winhome` and link it to my Windows home directory (where I have `.wsl` directory with various interoperability tools from Windows side). I am assuming that [gclpr](https://github.com/rupor-github/gclpr) is in your path on `remote` and you installed it's Windows counterpart somewhere in `drvfs` location (~/winhome/.wsl is a good place).
 
-I auto-start `agent-gui.exe` on logon on my Windows box - no customization is needed (except for `gclpr` public keys from various locations I would like to share my clipboard with)
+I auto-start `agent-gui.exe` on logon on my Windows box - no special customization is needed (except for `gclpr` public keys from various locations I would like to share my clipboard with)
 
 In my .bashrc I detect what I have and where it runs using code like this:
 
@@ -282,15 +297,14 @@ if has("unix")
 endif
 ```
 
-
-Using SSH and Linux you could remote GPG extra socket as far as you want by adding something like this to you `.ssh/config` where you want it:
+Using SSH and Linux you could remote GnuPG extra socket as far as you want by adding something like this to you `.ssh/config` where you want it:
 ```
 RemoteForward /home/rupor/.gnupg/S.gpg-agent /home/rupor/.gnupg/S.gpg-agent.extra
 ```
 
 Just follow [this guide](https://gist.github.com/TimJDFletcher/85fafd023c81aabfad57454111c1564d) - it will allow you to sign you git commits everywhere using single private key while keeping it in a single safe place (like smart card). You will still have to distribute and import public key in multiple places, which may be inconvenient but should be secure. You could [read a bit more](https://www.gnupg.org/gph/en/manual/x56.html#:~:text=To%20send%20your%20public%20key,identify%20the%20key%20to%20export.) on that.
 
-## Credit
+## Credits
 
 * Thanks to [Ben Pye](https://github.com/benpye) with his [wsl-ssh-pageant](https://github.com/benpye/wsl-ssh-pageant) for inspiration.
 * Thanks to [Masataka Pocke Kuwabara](https://github.com/pocke) for [lemonade](https://github.com/lemonade-command/lemonade) - a remote utility tool. (copy, paste and open browser) over TCP.
