@@ -387,7 +387,7 @@ func (t *winTray) initInstance() error {
 
 	taskbarEventNamePtr, _ := windows.UTF16PtrFromString("TaskbarCreated")
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644947
-	res, _, err := pRegisterWindowMessage.Call(
+	res, _, _ := pRegisterWindowMessage.Call(
 		uintptr(unsafe.Pointer(taskbarEventNamePtr)),
 	)
 	t.wmTaskbarCreated = uint32(res)
@@ -594,7 +594,7 @@ func (t *winTray) addOrUpdateMenuItem(menuItemId uint32, parentId uint32, title 
 		t.muMenus.Unlock()
 	} else if t.getVisibleItemIndex(parentId, menuItemId) != -1 {
 		// We set the menu item info based on the menuID
-		res, _, err = pSetMenuItemInfo.Call(
+		res, _, _ = pSetMenuItemInfo.Call(
 			uintptr(menu),
 			uintptr(menuItemId),
 			0,
