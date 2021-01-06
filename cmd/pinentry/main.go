@@ -80,6 +80,20 @@ func addCachedCredential(name, passwd string) {
 	}
 }
 
+func prepErrMsg(attempt int, s *pinentry.Settings) string {
+	if attempt == 0 {
+		if len(s.Error) > 0 {
+			return s.Error
+		}
+		return ""
+	}
+	// we are repeating - passwords did not match
+	if len(s.RepeatError) > 0 {
+		return s.RepeatError
+	}
+	return "Does not match - try again"
+}
+
 func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (string, *common.Error) {
 
 	if len(s.Error) == 0 && len(s.RepeatPrompt) == 0 && s.Opts.AllowExtPasswdCache && len(s.KeyInfo) != 0 {
@@ -99,21 +113,8 @@ func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (stri
 
 	for attempt := 0; ; attempt++ {
 
-		var errMsg string
-		if attempt == 0 {
-			if len(s.Error) > 0 {
-				errMsg = s.Error
-			}
-		} else {
-			// we are repeating - passwords did not match
-			if len(s.RepeatError) > 0 {
-				errMsg = s.RepeatError
-			} else {
-				errMsg = "Does not match - try again"
-			}
-		}
-
-		cancelOp, passwd1, cachePasswd = util.PromptForWindowsCredentials(cbs.cfg.GUI.PinDlg, errMsg, s.Desc, s.Prompt, s.Opts.AllowExtPasswdCache && len(s.KeyInfo) != 0)
+		cancelOp, passwd1, cachePasswd = util.PromptForWindowsCredentials(
+			cbs.cfg.GUI.PinDlg, prepErrMsg(attempt, s), s.Desc, s.Prompt, s.Opts.AllowExtPasswdCache && len(s.KeyInfo) != 0)
 		if cancelOp {
 			return "", createCommonError(common.ErrCanceled, "operation canceled")
 		}
