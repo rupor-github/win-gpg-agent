@@ -92,6 +92,49 @@ func onSession(e systray.SessionEvent) {
 	}
 }
 
+func setVars() (cleaner func(), err error) {
+
+	vars := []struct {
+		initialized         bool
+		name, value         string
+		register, translate bool
+	}{
+		{name: "WSL_" + envGPGHomeName, value: gpgAgent.Cfg.GPG.Home, register: true, translate: true},
+		{name: "WIN_" + envGPGHomeName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GPG.Home), register: true, translate: false},
+		{name: "WSL_" + envGUIHomeName, value: gpgAgent.Cfg.GUI.Home, register: true, translate: true},
+		{name: "WIN_" + envGUIHomeName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GUI.Home), register: true, translate: false},
+		{name: envPipeName, value: gpgAgent.Cfg.GUI.PipeName, register: false, translate: false},
+	}
+
+	cleaner = func() {
+		for i := len(vars) - 1; i >= 0; i-- {
+			if !vars[i].initialized {
+				continue
+			}
+			if err := util.CleanUserEnvironmentVariable(vars[i].name, vars[i].register); err != nil {
+				log.Printf("Unable to delete %s from user environment: %s", vars[i].name, err.Error())
+			}
+			vars[i].initialized = false
+		}
+	}
+
+	defer func() {
+		if err != nil {
+			// in case of error - unwind all registrations which already succeeded
+			cleaner()
+		}
+	}()
+
+	// register everything
+	for i := 0; i < len(vars); i++ {
+		if err = util.PrepareUserEnvironmentVariable(vars[i].name, vars[i].value, vars[i].register, vars[i].translate); err != nil {
+			return cleaner, fmt.Errorf("unable to add %s to user environment: %w", vars[i].name, err)
+		}
+		vars[i].initialized = true
+	}
+	return
+}
+
 func run() error {
 
 	// Eventually gpg-agent on Windows will directly support Windows openssh server (Oh, hear the call! — Good hunting all) - https://dev.gnupg.org/T3883.
@@ -125,48 +168,11 @@ func run() error {
 	defer gpgAgent.Close(agent.ConnectorSockAgentExtra)
 
 	if gpgAgent.Cfg.GUI.SetEnv {
-		if err := util.PrepareUserEnvironmentVariable("WSL_"+envGPGHomeName, gpgAgent.Cfg.GPG.Home, true, true); err != nil {
-			return fmt.Errorf("unable to add %s to user environment: %w", "WSL_"+envGPGHomeName, err)
+		cleaner, err := setVars()
+		if err != nil {
+			return err
 		}
-		defer func() {
-			if err := util.CleanUserEnvironmentVariable("WSL_"+envGPGHomeName, true); err != nil {
-				log.Printf("Unable to delete %s from user environment: %s", "WSL_"+envGPGHomeName, err.Error())
-			}
-		}()
-		if err := util.PrepareUserEnvironmentVariable("WIN_"+envGPGHomeName, util.PrepareWindowsPath(gpgAgent.Cfg.GPG.Home), true, false); err != nil {
-			return fmt.Errorf("unable to add %s to user environment: %w", "WIN_"+envGPGHomeName, err)
-		}
-		defer func() {
-			if err := util.CleanUserEnvironmentVariable("WIN_"+envGPGHomeName, true); err != nil {
-				log.Printf("Unable to delete %s from user environment: %s", "WIN_"+envGPGHomeName, err.Error())
-			}
-		}()
-
-		if err := util.PrepareUserEnvironmentVariable("WSL_"+envGUIHomeName, gpgAgent.Cfg.GUI.Home, true, true); err != nil {
-			return fmt.Errorf("unable to add %s to user environment: %w", "WSL_"+envGUIHomeName, err)
-		}
-		defer func() {
-			if err := util.CleanUserEnvironmentVariable("WSL_"+envGUIHomeName, true); err != nil {
-				log.Printf("Unable to delete %s from user environment: %s", "WSL_"+envGUIHomeName, err.Error())
-			}
-		}()
-		if err := util.PrepareUserEnvironmentVariable("WIN_"+envGUIHomeName, util.PrepareWindowsPath(gpgAgent.Cfg.GUI.Home), true, false); err != nil {
-			return fmt.Errorf("unable to add %s to user environment: %w", "WIN_"+envGUIHomeName, err)
-		}
-		defer func() {
-			if err := util.CleanUserEnvironmentVariable("WIN_"+envGUIHomeName, true); err != nil {
-				log.Printf("Unable to delete %s from user environment: %s", "WIN_"+envGUIHomeName, err.Error())
-			}
-		}()
-
-		if err := util.PrepareUserEnvironmentVariable(envPipeName, gpgAgent.Cfg.GUI.PipeName, false, false); err != nil {
-			return fmt.Errorf("unable to add %s to user environment: %w", envPipeName, err)
-		}
-		defer func() {
-			if err := util.CleanUserEnvironmentVariable(envPipeName, false); err != nil {
-				log.Printf("Unable to delete %s from user environment: %s", envPipeName, err.Error())
-			}
-		}()
+		defer cleaner()
 	}
 
 	if err := gpgAgent.Start(); err != nil {
