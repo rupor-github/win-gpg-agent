@@ -92,7 +92,7 @@ func onSession(e systray.SessionEvent) {
 	}
 }
 
-func setVars() (cleaner func(), err error) {
+func setVars() (func(), error) {
 
 	vars := []struct {
 		initialized         bool
@@ -106,33 +106,26 @@ func setVars() (cleaner func(), err error) {
 		{name: envPipeName, value: gpgAgent.Cfg.GUI.PipeName, register: false, translate: false},
 	}
 
-	cleaner = func() {
+	cleaner := func() {
 		for i := len(vars) - 1; i >= 0; i-- {
-			if !vars[i].initialized {
-				continue
+			if vars[i].initialized {
+				if err := util.CleanUserEnvironmentVariable(vars[i].name, vars[i].register); err != nil {
+					log.Printf("Unable to delete %s from user environment: %s", vars[i].name, err.Error())
+				}
+				vars[i].initialized = false
 			}
-			if err := util.CleanUserEnvironmentVariable(vars[i].name, vars[i].register); err != nil {
-				log.Printf("Unable to delete %s from user environment: %s", vars[i].name, err.Error())
-			}
-			vars[i].initialized = false
 		}
 	}
-
-	defer func() {
-		if err != nil {
-			// in case of error - unwind all registrations which already succeeded
-			cleaner()
-		}
-	}()
 
 	// register everything
 	for i := 0; i < len(vars); i++ {
-		if err = util.PrepareUserEnvironmentVariable(vars[i].name, vars[i].value, vars[i].register, vars[i].translate); err != nil {
-			return cleaner, fmt.Errorf("unable to add %s to user environment: %w", vars[i].name, err)
+		if err := util.PrepareUserEnvironmentVariable(vars[i].name, vars[i].value, vars[i].register, vars[i].translate); err != nil {
+			cleaner()
+			return nil, fmt.Errorf("unable to add %s to user environment: %w", vars[i].name, err)
 		}
 		vars[i].initialized = true
 	}
-	return
+	return cleaner, nil
 }
 
 func run() error {
