@@ -7,6 +7,7 @@ import (
 	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
+// Options part of Setting structure.
 type Options struct {
 	Grab                bool
 	AllowExtPasswdCache bool

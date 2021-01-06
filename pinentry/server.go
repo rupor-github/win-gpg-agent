@@ -16,12 +16,16 @@ import (
 )
 
 var version = "undefined"
+
+// DefaultSettings keep global initial state to avoid initialization loop.
 var DefaultSettings Settings
 
+// CredentialName generates name of credential to be used as a key to store it in external cache.
 func CredentialName(key string) string {
 	return "GnuPG:PinGO=" + key
 }
 
+// Callbacks list functions to be implemented by caller.
 type Callbacks struct {
 	GetPIN  func(*common.Pipe, *Settings) (string, *common.Error)
 	Confirm func(*common.Pipe, *Settings) (bool, *common.Error)
@@ -216,6 +220,7 @@ func setOpt(state interface{}, key string, val string) error {
 	}
 }
 
+// Info is our pinentry protocol definition.
 var Info = server.ProtoInfo{
 	Greeting: "PinGO (w32)",
 	Handlers: map[string]server.CommandHandler{
@@ -246,6 +251,7 @@ var Info = server.ProtoInfo{
 	SetOption: setOpt,
 }
 
+// Serve handles pinentry protocol.
 func Serve(callbacks Callbacks, ver string) error {
 	info := Info
 

@@ -17,7 +17,7 @@ import (
 	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
-// LibAssaun file socket on Windows - read contents of the target file and connect to a TCP port
+// Dial Asuan file socket on Windows - read contents of the target file and connect to a TCP port
 func Dial(fn string) (net.Conn, error) {
 
 	f, err := os.Open(fn)

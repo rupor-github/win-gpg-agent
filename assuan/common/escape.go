@@ -7,27 +7,17 @@ import (
 
 var escaper = strings.NewReplacer("\r", "%0D", "\n", "%0A", "%", "%25", "\\", "%5C")
 
-/*
-Percent-encode CR, LF, % and backslash at end as required by protocol.
-
-We escape all backslashes to keep code simple.
-
-Ref.: https//www.gnupg.org/documentation/manuals/assuan/Client-requests.html
-*/
+// EscapeParameters percent-encodes CR, LF, % and backslash at end as required by protocol.
+// Note: We escape all backslashes to keep code simple.
+// Ref.: https//www.gnupg.org/documentation/manuals/assuan/Client-requests.html
 func EscapeParameters(raw string) string {
 	return escaper.Replace(raw)
 }
 
-/*
-Reverse of EscapeParameters function.
-
-It does unescape any escaped character, not only CR, LF, % and
-backslashes.
-
-Ref.: https//www.gnupg.org/documentation/manuals/assuan/Client-requests.html
-*/
+// UnescapeParameters reverses EscapeParameters function.
+// Note: It does unescape any escaped character, not only CR, LF, % and backslashes.
+// Ref.: https//www.gnupg.org/documentation/manuals/assuan/Client-requests.html
 func UnescapeParameters(encoded string) (string, error) {
-	// Percent-encoding used in Assuan is same as percent-encoding used in
-	// path part of URL.
+	// Percent-encoding used in Assuan is same as percent-encoding used in path part of URL.
 	return url.PathUnescape(encoded)
 }

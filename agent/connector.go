@@ -24,8 +24,10 @@ import (
 	"github.com/rupor-github/win-gpg-agent/util"
 )
 
+// ConnectorType to define what we support.
 type ConnectorType int
 
+// All possible Connector Types.
 const (
 	ConnectorSockAgent ConnectorType = iota
 	ConnectorSockAgentExtra
@@ -51,6 +53,7 @@ func (ct ConnectorType) String() string {
 	return fmt.Sprintf("unknown connector type %d", ct)
 }
 
+// Connector keeps parameters to be able to serve particular ConnectorType.
 type Connector struct {
 	index    ConnectorType
 	pathGPG  string
@@ -61,6 +64,7 @@ type Connector struct {
 	listener net.Listener
 }
 
+// NewConnector initializes Connector of particular ConnectorType.
 func NewConnector(index ConnectorType, pathGPG, pathGUI, name string, locked *int32, wg *sync.WaitGroup) *Connector {
 	return &Connector{
 		index:   index,
@@ -72,6 +76,7 @@ func NewConnector(index ConnectorType, pathGPG, pathGUI, name string, locked *in
 	}
 }
 
+// CLose stops serving on Connector.
 func (c *Connector) Close() {
 	if c == nil || c.listener == nil {
 		return
@@ -86,18 +91,22 @@ func (c *Connector) Close() {
 	}
 }
 
+// PathGPG returns path to gpg socket being served.
 func (c *Connector) PathGPG() string {
 	return filepath.Join(c.pathGPG, c.name)
 }
 
+// PathGUI returns path to unix socket being served.
 func (c *Connector) PathGUI() string {
 	return filepath.Join(c.pathGUI, c.name)
 }
 
+// Name returns name part of socket/pipe being served.
 func (c *Connector) Name() string {
 	return c.name
 }
 
+// Serve serves requests on Connector.
 func (c *Connector) Serve(deadline time.Duration) error {
 	switch c.index {
 	case ConnectorSockAgent:
@@ -157,7 +166,7 @@ func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 				socketNameAssuan := c.PathGPG()
 				connAssuan, err := client.Dial(socketNameAssuan)
 				if err != nil {
-					log.Printf("[%d] Unable to dial assuan socket \"%s\": %w", id, socketNameAssuan, err.Error())
+					log.Printf("[%d] Unable to dial assuan socket \"%s\": %s", id, socketNameAssuan, err.Error())
 				}
 
 				c.wg.Add(1)
@@ -167,14 +176,13 @@ func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 					log.Printf("[%d] Copying from %s to %s", id, socketName, socketNameAssuan)
 					for c.locked == nil || atomic.LoadInt32(c.locked) == 0 {
 						if deadline != 0 {
-							conn.SetDeadline(time.Now().Add(deadline))
+							_ = conn.SetDeadline(time.Now().Add(deadline))
 						}
 						l, err := io.Copy(connAssuan, conn)
 						if err != nil {
 							if errors.Is(err, os.ErrDeadlineExceeded) {
 								if l > 0 {
 									log.Printf("[%d] Copied from %s to %s - %d bytes, continuing", id, socketName, socketNameAssuan, l)
-									l = 0
 									continue
 								}
 								log.Printf("[%d] No activity on connection from %s to %s, exiting", id, socketName, socketNameAssuan)
@@ -194,14 +202,13 @@ func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 				log.Printf("[%d] Copying from %s to %s", id, socketNameAssuan, socketName)
 				for c.locked == nil || atomic.LoadInt32(c.locked) == 0 {
 					if deadline != 0 {
-						connAssuan.SetDeadline(time.Now().Add(deadline))
+						_ = connAssuan.SetDeadline(time.Now().Add(deadline))
 					}
 					l, err := io.Copy(conn, connAssuan)
 					if err != nil {
 						if errors.Is(err, os.ErrDeadlineExceeded) {
 							if l > 0 {
 								log.Printf("[%d] Copied from %s to %s - %d bytes, continuing", id, socketNameAssuan, socketName, l)
-								l = 0
 								continue
 							}
 							log.Printf("[%d] No activity on connection from %s to %s, exiting", id, socketNameAssuan, socketName)

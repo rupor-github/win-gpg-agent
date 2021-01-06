@@ -135,9 +135,8 @@ func handleCmd(pipe *common.Pipe, cmd string, params string, proto ProtoInfo, st
 					return err
 				}
 				return nil
-			} else {
-				return err
 			}
+			return err
 		}
 		if err := pipe.WriteLine("OK", ""); err != nil {
 			log.Println("... IO error, dropping session:", err)

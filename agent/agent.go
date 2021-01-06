@@ -21,6 +21,7 @@ import (
 	"github.com/rupor-github/win-gpg-agent/util"
 )
 
+// Agent structure wraps running gpg-agent process.
 type Agent struct {
 	Cfg       *config.Config
 	Ver, Exe  string
@@ -33,6 +34,7 @@ type Agent struct {
 	conns     []*Connector
 }
 
+// NewAgent initializes Agent structure.
 func NewAgent(cfg *config.Config) (*Agent, error) {
 
 	a := &Agent{Cfg: cfg}
@@ -73,6 +75,7 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	return a, nil
 }
 
+// Status returns string with currently running agent configuration.
 func (a *Agent) Status() string {
 	var buf strings.Builder
 
@@ -85,6 +88,7 @@ func (a *Agent) Status() string {
 	return buf.String()
 }
 
+// SessionLock sets flag to indicate that user session is presently locked.
 func (a *Agent) SessionLock() {
 	if a != nil {
 		atomic.StoreInt32(&a.locked, 1)
@@ -92,6 +96,7 @@ func (a *Agent) SessionLock() {
 	}
 }
 
+// SessionUnlock sets flag to indicate that user session is presently unlocked.
 func (a *Agent) SessionUnlock() {
 	if a != nil {
 		atomic.StoreInt32(&a.locked, 0)
@@ -126,6 +131,7 @@ func sendAssuanCmd(sockPath string, transact func(*client.Session) error) error 
 	return nil
 }
 
+// Start executes gpg-agent using configuration values.
 func (a *Agent) Start() error {
 
 	const DETACHED_PROCESS = 0x00000008
@@ -188,6 +194,7 @@ func (a *Agent) Start() error {
 	return nil
 }
 
+// Serve handles serving requests for a particular ConnectorType.
 func (a *Agent) Serve(ct ConnectorType) error {
 	if a == nil || ct > maxConnector {
 		return fmt.Errorf("gui agent has not been initialized properly")
@@ -195,6 +202,7 @@ func (a *Agent) Serve(ct ConnectorType) error {
 	return a.conns[ct].Serve(a.Cfg.GUI.Deadline)
 }
 
+// Close stops serving requests for a particular ConnectorType.
 func (a *Agent) Close(ct ConnectorType) {
 	if a == nil || ct > maxConnector {
 		return
@@ -202,6 +210,7 @@ func (a *Agent) Close(ct ConnectorType) {
 	a.conns[ct].Close()
 }
 
+// Stop stops all connectors and gpg-agent cleanly.
 func (a *Agent) Stop() error {
 
 	if a == nil || a.cmd == nil {

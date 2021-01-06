@@ -12,6 +12,7 @@ import (
 	"github.com/rupor-github/win-gpg-agent/util"
 )
 
+// GPGConfig structs wraps configuration values for GnuPG.
 type GPGConfig struct {
 	Path   string   `yaml:"install_path,omitempty"`
 	Home   string   `yaml:"homedir,omitempty"`
@@ -25,12 +26,14 @@ gpg:
   homedir: "${APPDATA}\\gnupg"
 `
 
+// CLPConfig wraps configuration values for gclpr.
 type CLPConfig struct {
 	Port int      `yaml:"port,omitempty"`
 	LE   string   `yaml:"line_endings,omitempty"`
 	Keys []string `yaml:"public_keys,omitempty"`
 }
 
+// GUIConfig wraps configuration values for agent-gui, pinentry and sorelay.
 type GUIConfig struct {
 	Debug             bool            `yaml:"debug,omitempty"`
 	SetEnv            bool            `yaml:"setenv,omitempty"`
@@ -64,6 +67,7 @@ type Config struct {
 	GPG GPGConfig
 }
 
+// Load prepares configuration structures using all available sources.
 func Load(fnames ...string) (*Config, error) {
 
 	configSources := []ucfg.YAMLOption{

@@ -39,7 +39,7 @@ func WriteError(err error) *Error {
 	}
 }
 
-// WriteError converts arbitrary error object to protocol error with Assuan Read Error code.
+// ReadError converts arbitrary error object to protocol error with Assuan Read Error code.
 func ReadError(err error) *Error {
 	return &Error{
 		Src: ErrSrcAssuan, Code: ErrAssReadError,
@@ -57,6 +57,7 @@ func mapSource(src string) string {
 	return src
 }
 
+// DecodeErrCmd converts protocol string into error.
 func DecodeErrCmd(params string) error {
 	// Errors are presented in following format:
 	//  ERR CODE      Description         <Source name>
@@ -86,6 +87,7 @@ func DecodeErrCmd(params string) error {
 	return Error{Src: srcCode, Code: errCode, SrcName: src, Message: desc}
 }
 
+// SplitErrCode splits integer code into parts according to protocol.
 func SplitErrCode(code int) (ErrorSource, ErrorCode) {
 	return ErrorSource(code >> errSrcShift), ErrorCode(code & errCodeMask)
 }

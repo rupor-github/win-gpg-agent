@@ -10,6 +10,7 @@ import (
 	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
+// Client for Assuan Session.
 type Client struct {
 	Session *assuan.Session
 
@@ -17,8 +18,7 @@ type Client struct {
 	qualityBar bool
 }
 
-// Launch starts pinentry binary found in directories from PATH envvar and creates
-// pinentry.Client for interaction with it.
+// Launch starts pinentry binary found in directories from PATH envvar and creates pinentry.Client for interaction with it.
 func Launch() (*Client, error) {
 	cmd := exec.Command("pinentry")
 
@@ -31,8 +31,7 @@ func Launch() (*Client, error) {
 	return c, nil
 }
 
-// Launch starts pinentry binary specified by passed path and creates
-// pinentry.Client for interaction with it.
+// LaunchCustom starts pinentry binary specified by passed path and creates pinentry.Client for interaction with it.
 func LaunchCustom(path string) (Client, error) {
 	cmd := exec.Command(path)
 
@@ -45,6 +44,7 @@ func LaunchCustom(path string) (Client, error) {
 	return c, nil
 }
 
+// New initializes Client but does not start pinentry binary.
 func New(stream io.ReadWriter) (Client, error) {
 	c := Client{}
 	var err error
@@ -55,14 +55,17 @@ func New(stream io.ReadWriter) (Client, error) {
 	return c, err
 }
 
+// Close ends Session.
 func (c *Client) Close() error {
 	return c.Session.Close()
 }
 
+// Reset resets Session.
 func (c *Client) Reset() error {
 	return c.Session.Reset()
 }
 
+// SetDesc sends SETDESC Assuan command and stores results.
 func (c *Client) SetDesc(text string) error {
 	if _, err := c.Session.SimpleCmd("SETDESC", text); err != nil {
 		return err
@@ -71,6 +74,7 @@ func (c *Client) SetDesc(text string) error {
 	return nil
 }
 
+// SetPrompt sends SETPROMPT Assuan command and stores results.
 func (c *Client) SetPrompt(text string) error {
 	if _, err := c.Session.SimpleCmd("SETPROMPT", text); err != nil {
 		return err
@@ -79,6 +83,7 @@ func (c *Client) SetPrompt(text string) error {
 	return nil
 }
 
+// SetError sends SETERROR Assuan command and stores results.
 func (c *Client) SetError(text string) error {
 	if _, err := c.Session.SimpleCmd("SETERROR", text); err != nil {
 		return err
@@ -87,6 +92,7 @@ func (c *Client) SetError(text string) error {
 	return nil
 }
 
+// SetOkBtn sends SETOK Assuan command and stores results.
 func (c *Client) SetOkBtn(text string) error {
 	if _, err := c.Session.SimpleCmd("SETOK", text); err != nil {
 		return err
@@ -95,6 +101,7 @@ func (c *Client) SetOkBtn(text string) error {
 	return nil
 }
 
+// SetNotOkBtn sends SETNOTOK Assuan command and stores results.
 func (c *Client) SetNotOkBtn(text string) error {
 	if _, err := c.Session.SimpleCmd("SETNOTOK", text); err != nil {
 		return err
@@ -103,6 +110,7 @@ func (c *Client) SetNotOkBtn(text string) error {
 	return nil
 }
 
+// SetCancelBtn sends SETCANCEL Assuan command and stores results.
 func (c *Client) SetCancelBtn(text string) error {
 	if _, err := c.Session.SimpleCmd("SETCANCEL", text); err != nil {
 		return err
@@ -111,6 +119,7 @@ func (c *Client) SetCancelBtn(text string) error {
 	return nil
 }
 
+// SetTitle sends SETTITLE Assuan command and stores results.
 func (c *Client) SetTitle(text string) error {
 	if _, err := c.Session.SimpleCmd("SETTITLE", text); err != nil {
 		return err
@@ -119,6 +128,7 @@ func (c *Client) SetTitle(text string) error {
 	return nil
 }
 
+// SetTimeout sends SETTIMEOUT Assuan command and stores results.
 func (c *Client) SetTimeout(timeout time.Duration) error {
 	if _, err := c.Session.SimpleCmd("SETTIMEOUT", strconv.Itoa(int(timeout.Seconds()))); err != nil {
 		return err
@@ -127,6 +137,7 @@ func (c *Client) SetTimeout(timeout time.Duration) error {
 	return nil
 }
 
+// SetRepeatPrompt sends SETREPEAT Assuan command and stores results.
 func (c *Client) SetRepeatPrompt(text string) error {
 	if _, err := c.Session.SimpleCmd("SETREPEAT", text); err != nil {
 		return err
@@ -135,6 +146,7 @@ func (c *Client) SetRepeatPrompt(text string) error {
 	return nil
 }
 
+// SetRepeatError sends SETREPEATERROR Assuan command and stores results.
 func (c *Client) SetRepeatError(text string) error {
 	if _, err := c.Session.SimpleCmd("SETREPEATERROR", text); err != nil {
 		return err
@@ -143,6 +155,7 @@ func (c *Client) SetRepeatError(text string) error {
 	return nil
 }
 
+// SetQualityBar sends SETQUALITYBAR Assuan command and stores results.
 func (c *Client) SetQualityBar(text string) error {
 	if _, err := c.Session.SimpleCmd("SETQUALITYBAR", text); err != nil {
 		return err
@@ -152,14 +165,17 @@ func (c *Client) SetQualityBar(text string) error {
 	return nil
 }
 
+// SetPasswdQualityCallback stores quality check callback.
 func (c *Client) SetPasswdQualityCallback(callback func(string) int) {
 	c.current.PasswordQuality = callback
 }
 
+// Current returns a copy of current settings.
 func (c *Client) Current() Settings {
 	return c.current
 }
 
+// Apply initializes current settings.
 func (c *Client) Apply(s Settings) error {
 	if err := c.SetDesc(s.Desc); err != nil {
 		return err

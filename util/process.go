@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/go-ps"
 )
 
+// KillRunningAgent uses Os functions to terminate gpg-agent ungracefully.
 func KillRunningAgent() error {
 	processes, err := ps.Processes()
 	if err != nil {

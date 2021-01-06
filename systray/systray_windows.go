@@ -1,3 +1,5 @@
+// +build windows
+
 //nolint
 package systray
 

@@ -29,18 +29,21 @@ type Pipe struct {
 	w    io.Writer
 }
 
+// New crreates and initializes Pipe using biderectional stream.
 func New(stream io.ReadWriter) Pipe {
 	p := Pipe{bufio.NewScanner(stream), stream, stream}
 	p.scnr.Buffer(make([]byte, 0, MaxLineLen), MaxLineLen)
 	return p
 }
 
+// NewPipe crreates and initializes Pipe using 2 streams.
 func NewPipe(in io.Reader, out io.Writer) Pipe {
 	p := Pipe{bufio.NewScanner(in), in, out}
 	p.scnr.Buffer(make([]byte, 0, MaxLineLen), MaxLineLen)
 	return p
 }
 
+// CLose closes Pipe.
 func (p *Pipe) Close() error {
 	// Reserved for future use, no-op now.
 	return nil
