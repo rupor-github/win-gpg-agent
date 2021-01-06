@@ -3,10 +3,12 @@
     <p align="center">
 		Simple set of tools to make working with GnuPG easier on Windows 10.
     </p>
+    <p align="center">
+        <a href="https://pkg.go.dev/mod/github.com/rupor-github/win-qpq-agent/?tab=packages"><img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-blue.svg" /></a>
+        <a href="https://goreportcard.com/report/github.com/rupor-github/win-gpg-agent"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/rupor-github/win-gpg-agent" /></a>
+    </p>    
     <hr>
 </p>
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/rupor-github/win-gpg-agent)](https://goreportcard.com/report/github.com/rupor-github/win-gpg-agent)
 
 Windows 10 has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https:/github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux.
 
