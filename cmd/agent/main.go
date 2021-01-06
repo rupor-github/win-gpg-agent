@@ -184,6 +184,36 @@ func buildUsageString() string {
 	return buf.String()
 }
 
+func clipServe(cfg *config.Config) {
+	clipCtx, clipCancel = context.WithCancel(context.Background())
+	if len(cfg.GUI.Clp.Keys) > 0 {
+		var (
+			pkey  [32]byte
+			pkeys = make(map[[32]byte]struct{})
+		)
+		for i, k := range cfg.GUI.Clp.Keys {
+			pk, err := hex.DecodeString(k)
+			if err != nil || len(pk) != 32 {
+				log.Printf("Bad gclpr public key %d. Ignoring", i)
+				continue
+			}
+			log.Printf("gclpr found public key: %s", k)
+			copy(pkey[:], pk)
+			pkeys[pkey] = struct{}{}
+		}
+		if len(pkeys) > 0 {
+			// we have possible clients for remote clipboard
+			clipHelp = fmt.Sprintf("gclpr is serving %d key(s) on port %d", len(pkeys), cfg.GUI.Clp.Port)
+			go func() {
+				if err := clip.Serve(clipCtx, cfg.GUI.Clp.Port, cfg.GUI.Clp.LE, pkeys); err != nil {
+					log.Printf("gclpr serve() returned error: %s", err.Error())
+					clipHelp = "gclpr is not running"
+				}
+			}()
+		}
+	}
+}
+
 func main() {
 
 	util.NewLogWriter(title, 0, false)
@@ -251,33 +281,8 @@ func main() {
 		os.Remove(lockName)
 	}()
 
-	clipCtx, clipCancel = context.WithCancel(context.Background())
-	if len(cfg.GUI.Clp.Keys) > 0 {
-		var (
-			pkey  [32]byte
-			pkeys = make(map[[32]byte]struct{})
-		)
-		for i, k := range cfg.GUI.Clp.Keys {
-			pk, err := hex.DecodeString(k)
-			if err != nil || len(pk) != 32 {
-				log.Printf("Bad gclpr public key %d. Ignoring", i)
-				continue
-			}
-			log.Printf("gclpr found public key: %s", k)
-			copy(pkey[:], pk)
-			pkeys[pkey] = struct{}{}
-		}
-		if len(pkeys) > 0 {
-			// we have possible clients for remote clipboard
-			clipHelp = fmt.Sprintf("gclpr is serving %d key(s) on port %d", len(pkeys), cfg.GUI.Clp.Port)
-			go func() {
-				if err := clip.Serve(clipCtx, cfg.GUI.Clp.Port, cfg.GUI.Clp.LE, pkeys); err != nil {
-					log.Printf("gclpr serve() returned error: %s", err.Error())
-					clipHelp = "gclpr is not running"
-				}
-			}()
-		}
-	}
+	// serve gclpr if requested
+	clipServe(cfg)
 
 	// We want to fully control gpg-agent, so if it is running - either we left it from previous run or it is not ours
 	// Both cases should never happen so try to kill it just in case...
