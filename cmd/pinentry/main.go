@@ -49,11 +49,6 @@ func sendStatus(pipe *common.Pipe, cmd string) *common.Error {
 	return nil
 }
 
-// We may need to keep some additional state between calls - pinentry state machine is old...
-type callbacksState struct {
-	cfg *config.Config
-}
-
 func getCachedCredential(pipe *common.Pipe, s *pinentry.Settings) (string, *common.Error) {
 	cred, err := wincred.GetGenericCredential(pinentry.CredentialName(s.KeyInfo))
 	if err != nil && !errors.Is(err, windows.ERROR_NOT_FOUND) {
@@ -150,6 +145,11 @@ func (cbs *callbacksState) Confirm(_ *common.Pipe, s *pinentry.Settings) (bool, 
 func (cbs *callbacksState) Msg(_ *common.Pipe, s *pinentry.Settings) *common.Error {
 	util.PromptForConfirmaion(util.DlgDetails{}, s.Desc, s.Prompt, true)
 	return nil
+}
+
+// We may need to keep some additional state between calls - pinentry state machine is old...
+type callbacksState struct {
+	cfg *config.Config
 }
 
 func main() {
