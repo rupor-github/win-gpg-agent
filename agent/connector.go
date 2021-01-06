@@ -122,6 +122,76 @@ func (c *Connector) Serve(deadline time.Duration) error {
 	return nil
 }
 
+func (c *Connector) handleAssuanRequest(socketName string, conn net.Conn, deadline time.Duration) {
+
+	defer c.wg.Done()
+	defer conn.Close()
+
+	id := time.Now().UnixNano() // create unique id for debug tracing
+	log.Printf("[%d] Accepted request from %s", id, socketName)
+
+	socketNameAssuan := c.PathGPG()
+	connAssuan, err := client.Dial(socketNameAssuan)
+	if err != nil {
+		log.Printf("[%d] Unable to dial assuan socket \"%s\": %s", id, socketNameAssuan, err.Error())
+	}
+
+	c.wg.Add(1)
+	go func() {
+		defer c.wg.Done()
+		defer connAssuan.Close()
+		log.Printf("[%d] Copying from %s to %s", id, socketName, socketNameAssuan)
+		for c.locked == nil || atomic.LoadInt32(c.locked) == 0 {
+			if deadline != 0 {
+				_ = conn.SetDeadline(time.Now().Add(deadline))
+			}
+			l, err := io.Copy(connAssuan, conn)
+			if err != nil {
+				if errors.Is(err, os.ErrDeadlineExceeded) {
+					if l > 0 {
+						log.Printf("[%d] Copied from %s to %s - %d bytes, continuing", id, socketName, socketNameAssuan, l)
+						continue
+					}
+					log.Printf("[%d] No activity on connection from %s to %s, exiting", id, socketName, socketNameAssuan)
+					return
+				}
+				if !util.IsNetClosing(err) {
+					log.Printf("[%d] Error copying from %s to %s - %d: %s", id, socketName, socketNameAssuan, l, err.Error())
+					return
+				}
+			}
+			log.Printf("[%d] Copied from %s to %s - %d bytes", id, socketName, socketNameAssuan, l)
+			return
+		}
+		log.Print("Session is locked")
+	}()
+
+	log.Printf("[%d] Copying from %s to %s", id, socketNameAssuan, socketName)
+	for c.locked == nil || atomic.LoadInt32(c.locked) == 0 {
+		if deadline != 0 {
+			_ = connAssuan.SetDeadline(time.Now().Add(deadline))
+		}
+		l, err := io.Copy(conn, connAssuan)
+		if err != nil {
+			if errors.Is(err, os.ErrDeadlineExceeded) {
+				if l > 0 {
+					log.Printf("[%d] Copied from %s to %s - %d bytes, continuing", id, socketNameAssuan, socketName, l)
+					continue
+				}
+				log.Printf("[%d] No activity on connection from %s to %s, exiting", id, socketNameAssuan, socketName)
+				return
+			}
+			if !util.IsNetClosing(err) {
+				log.Printf("[%d] Error copying from %s to %s - %d: %s", id, socketNameAssuan, socketName, l, err.Error())
+				return
+			}
+		}
+		log.Printf("[%d] Copied from %s to %s - %d bytes", id, socketNameAssuan, socketName, l)
+		return
+	}
+	log.Print("Session is locked")
+}
+
 func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 
 	if c == nil || len(c.pathGPG) == 0 || len(c.pathGUI) == 0 {
@@ -155,75 +225,8 @@ func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 				}
 				return
 			}
-
 			c.wg.Add(1)
-			go func() {
-				defer c.wg.Done()
-				defer conn.Close()
-				id := time.Now().UnixNano() // create unique id for debug tracing
-				log.Printf("[%d] Accepted request from %s", id, socketName)
-
-				socketNameAssuan := c.PathGPG()
-				connAssuan, err := client.Dial(socketNameAssuan)
-				if err != nil {
-					log.Printf("[%d] Unable to dial assuan socket \"%s\": %s", id, socketNameAssuan, err.Error())
-				}
-
-				c.wg.Add(1)
-				go func() {
-					defer c.wg.Done()
-					defer connAssuan.Close()
-					log.Printf("[%d] Copying from %s to %s", id, socketName, socketNameAssuan)
-					for c.locked == nil || atomic.LoadInt32(c.locked) == 0 {
-						if deadline != 0 {
-							_ = conn.SetDeadline(time.Now().Add(deadline))
-						}
-						l, err := io.Copy(connAssuan, conn)
-						if err != nil {
-							if errors.Is(err, os.ErrDeadlineExceeded) {
-								if l > 0 {
-									log.Printf("[%d] Copied from %s to %s - %d bytes, continuing", id, socketName, socketNameAssuan, l)
-									continue
-								}
-								log.Printf("[%d] No activity on connection from %s to %s, exiting", id, socketName, socketNameAssuan)
-								return
-							}
-							if !util.IsNetClosing(err) {
-								log.Printf("[%d] Error copying from %s to %s - %d: %s", id, socketName, socketNameAssuan, l, err.Error())
-								return
-							}
-						}
-						log.Printf("[%d] Copied from %s to %s - %d bytes", id, socketName, socketNameAssuan, l)
-						return
-					}
-					log.Print("Session is locked")
-				}()
-
-				log.Printf("[%d] Copying from %s to %s", id, socketNameAssuan, socketName)
-				for c.locked == nil || atomic.LoadInt32(c.locked) == 0 {
-					if deadline != 0 {
-						_ = connAssuan.SetDeadline(time.Now().Add(deadline))
-					}
-					l, err := io.Copy(conn, connAssuan)
-					if err != nil {
-						if errors.Is(err, os.ErrDeadlineExceeded) {
-							if l > 0 {
-								log.Printf("[%d] Copied from %s to %s - %d bytes, continuing", id, socketNameAssuan, socketName, l)
-								continue
-							}
-							log.Printf("[%d] No activity on connection from %s to %s, exiting", id, socketNameAssuan, socketName)
-							return
-						}
-						if !util.IsNetClosing(err) {
-							log.Printf("[%d] Error copying from %s to %s - %d: %s", id, socketNameAssuan, socketName, l, err.Error())
-							return
-						}
-					}
-					log.Printf("[%d] Copied from %s to %s - %d bytes", id, socketNameAssuan, socketName, l)
-					return
-				}
-				log.Print("Session is locked")
-			}()
+			go c.handleAssuanRequest(socketName, conn, deadline)
 		}
 	}()
 	return nil

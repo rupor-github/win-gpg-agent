@@ -37,6 +37,18 @@ var (
 	// aDisplay, aTTYName, aTTYType, aLCType, aLCMessages string
 )
 
+func createCommonError(code common.ErrorCode, msg string) *common.Error {
+	return &common.Error{Src: common.ErrSrcPinentry, Code: code, SrcName: "pinentry", Message: msg}
+}
+
+func sendStatus(pipe *common.Pipe, cmd string) *common.Error {
+	if err := pipe.WriteLine("S", cmd); err != nil {
+		log.Println("... IO error, dropping session:", err)
+		return createCommonError(common.ErrAssWriteError, "unable to return status")
+	}
+	return nil
+}
+
 // We may need to keep some additional state between calls - pinentry state machine is old...
 type callbacksState struct {
 	cfg *config.Config
@@ -52,13 +64,8 @@ func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (stri
 			s.Opts.AllowExtPasswdCache = false
 		}
 		if cred != nil {
-			log.Printf("PASSWORD_FROM_CACHE for %s", s.KeyInfo)
-			if err := pipe.WriteLine("S", "PASSWORD_FROM_CACHE"); err != nil {
-				log.Println("... IO error, dropping session:", err)
-				return "", &common.Error{
-					Src: common.ErrSrcPinentry, Code: common.ErrAssWriteError,
-					SrcName: "pinentry", Message: "unable to return status",
-				}
+			if err := sendStatus(pipe, "PASSWORD_FROM_CACHE"); err != nil {
+				return "", err
 			}
 			return string(cred.CredentialBlob), nil
 		}
@@ -87,10 +94,7 @@ func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (stri
 
 		cancelOp, passwd1, cachePasswd = util.PromptForWindowsCredentials(cbs.cfg.GUI.PinDlg, errMsg, s.Desc, s.Prompt, s.Opts.AllowExtPasswdCache && len(s.KeyInfo) != 0)
 		if cancelOp {
-			return "", &common.Error{
-				Src: common.ErrSrcPinentry, Code: common.ErrCanceled,
-				SrcName: "pinentry", Message: "operation canceled",
-			}
+			return "", createCommonError(common.ErrCanceled, "operation canceled")
 		}
 
 		if len(s.RepeatPrompt) == 0 {
@@ -99,20 +103,12 @@ func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (stri
 
 		cancelOp, passwd2, _ = util.PromptForWindowsCredentials(cbs.cfg.GUI.PinDlg, "", s.Desc, s.RepeatPrompt, false)
 		if cancelOp {
-			return "", &common.Error{
-				Src: common.ErrSrcPinentry, Code: common.ErrCanceled,
-				SrcName: "pinentry", Message: "operation canceled",
-			}
+			return "", createCommonError(common.ErrCanceled, "operation canceled")
 		}
 
 		if passwd1 == passwd2 {
-			log.Printf("PIN_REPEATED on attempt %d", attempt)
-			if err := pipe.WriteLine("S", "PIN_REPEATED"); err != nil {
-				log.Println("... IO error, dropping session:", err)
-				return "", &common.Error{
-					Src: common.ErrSrcPinentry, Code: common.ErrAssWriteError,
-					SrcName: "pinentry", Message: "unable to return status",
-				}
+			if err := sendStatus(pipe, "PIN_REPEATED"); err != nil {
+				return "", err
 			}
 			break
 		}
