@@ -776,7 +776,7 @@ func (t *winTray) loadIconFrom(src string) (windows.Handle, error) {
 	return h, nil
 }
 
-// Loads an image from instanse resource to be shown in tray or menu item.
+// Loads an image from instance resource to be shown in tray or menu item.
 // LoadImage: https://msdn.microsoft.com/en-us/library/windows/desktop/ms648045(v=vs.85).aspx
 func (t *winTray) loadIconFromResource(resID uint32) (windows.Handle, error) {
 	const IMAGE_ICON = 1              // Loads an icon
