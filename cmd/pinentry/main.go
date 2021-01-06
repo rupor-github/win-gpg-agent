@@ -54,21 +54,42 @@ type callbacksState struct {
 	cfg *config.Config
 }
 
+func getCachedCredential(pipe *common.Pipe, s *pinentry.Settings) (string, *common.Error) {
+	cred, err := wincred.GetGenericCredential(pinentry.CredentialName(s.KeyInfo))
+	if err != nil && !errors.Is(err, windows.ERROR_NOT_FOUND) {
+		log.Printf("GetGenericCredential cannot access vault: %s", err.Error())
+		s.Opts.AllowExtPasswdCache = false
+		return "", nil
+	}
+	if cred == nil {
+		// this should never happen, but just in case
+		return "", nil
+	}
+	if err := sendStatus(pipe, "PASSWORD_FROM_CACHE"); err != nil {
+		return "", err
+	}
+	return string(cred.CredentialBlob), nil
+}
+
+func addCachedCredential(name, passwd string) {
+	cred := wincred.NewGenericCredential(pinentry.CredentialName(name))
+	cred.CredentialBlob = []byte(passwd)
+	cred.Persist = wincred.PersistLocalMachine
+	if err := cred.Write(); err != nil {
+		log.Printf("Unable to store credential: %s", name)
+	}
+}
+
 func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (string, *common.Error) {
 
-	// GnuPG calls it "reading from password cache" - let's try it
 	if len(s.Error) == 0 && len(s.RepeatPrompt) == 0 && s.Opts.AllowExtPasswdCache && len(s.KeyInfo) != 0 {
-		cred, err := wincred.GetGenericCredential(pinentry.CredentialName(s.KeyInfo))
-		if err != nil && !errors.Is(err, windows.ERROR_NOT_FOUND) {
-			log.Printf("GetGenericCredential cannot access vault: %s", err.Error())
-			s.Opts.AllowExtPasswdCache = false
+		// GnuPG calls it "reading from password cache" - let's try it
+		if passwd, err := getCachedCredential(pipe, s); err != nil {
+			return "", err
+		} else if len(passwd) > 0 {
+			return passwd, nil
 		}
-		if cred != nil {
-			if err := sendStatus(pipe, "PASSWORD_FROM_CACHE"); err != nil {
-				return "", err
-			}
-			return string(cred.CredentialBlob), nil
-		}
+		// we never store enmpty pasword
 	}
 
 	var (
@@ -116,12 +137,7 @@ func (cbs *callbacksState) GetPIN(pipe *common.Pipe, s *pinentry.Settings) (stri
 
 	// Everything went well - let's see if we could save password for later use.
 	if s.Opts.AllowExtPasswdCache && len(s.KeyInfo) != 0 && cachePasswd && len(passwd1) > 0 {
-		cred := wincred.NewGenericCredential(pinentry.CredentialName(s.KeyInfo))
-		cred.CredentialBlob = []byte(passwd1)
-		cred.Persist = wincred.PersistLocalMachine
-		if err := cred.Write(); err != nil {
-			log.Printf("Unable to store credential: %s", s.KeyInfo)
-		}
+		addCachedCredential(s.KeyInfo, passwd1)
 	}
 	return passwd1, nil
 }
