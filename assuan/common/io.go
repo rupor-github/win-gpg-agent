@@ -43,7 +43,7 @@ func NewPipe(in io.Reader, out io.Writer) Pipe {
 	return p
 }
 
-// CLose closes Pipe.
+// Close closes Pipe.
 func (p *Pipe) Close() error {
 	// Reserved for future use, no-op now.
 	return nil

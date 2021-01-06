@@ -76,7 +76,7 @@ func NewConnector(index ConnectorType, pathGPG, pathGUI, name string, locked *in
 	}
 }
 
-// CLose stops serving on Connector.
+// Close stops serving on Connector.
 func (c *Connector) Close() {
 	if c == nil || c.listener == nil {
 		return
