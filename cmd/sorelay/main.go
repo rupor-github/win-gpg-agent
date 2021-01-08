@@ -21,7 +21,7 @@ var (
 	title   = "sorelay"
 	tooltip = "Socket relay program for WSL"
 	verStr  = fmt.Sprintf("%s (%s) %s", misc.GetVersion(), runtime.Version(), misc.GetGitHash())
-	// arguments
+	// Arguments.
 	cli         = getopt.New()
 	aConfigName = title + ".conf"
 	aShowHelp   bool
@@ -109,7 +109,7 @@ func main() {
 	l, err := io.Copy(os.Stdout, conn)
 	if err != nil && !util.IsNetClosing(err) {
 		log.Printf("Copy from %s to stdout failed: %s", socketName, err.Error())
-		os.Exit(1)
+		return
 	}
 	log.Printf("Copied from %s to stdout - %d bytes (socket EOF)", socketName, l)
 }

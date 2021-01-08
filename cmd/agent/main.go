@@ -89,6 +89,7 @@ func onSession(e systray.SessionEvent) {
 		gpgAgent.SessionLock()
 	case systray.SesUnlock:
 		gpgAgent.SessionUnlock()
+	default:
 	}
 }
 
@@ -274,11 +275,6 @@ func main() {
 		log.Print("Application already running")
 		os.Exit(0)
 	}
-	defer func() {
-		// Not necessary at all
-		inst.Close()
-		os.Remove(lockName)
-	}()
 
 	// serve gclpr if requested
 	clipServe(cfg)
@@ -301,4 +297,8 @@ func main() {
 	if err := run(); err != nil {
 		util.ShowOKMessage(util.MsgError, title, err.Error())
 	}
+
+	// Not necessary at all
+	inst.Close()
+	os.Remove(lockName)
 }

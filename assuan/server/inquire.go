@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"log"
 
 	"github.com/rupor-github/win-gpg-agent/assuan/common"
@@ -43,9 +44,8 @@ func Inquire(pipe *common.Pipe, keywords []string) (res map[string][]byte, err e
 
 		data, err := pipe.ReadData()
 		if err != nil {
-			perr, ok := err.(*common.Error)
-
-			if ok {
+			var perr *common.Error
+			if ok := errors.As(err, &perr); ok {
 				if err := pipe.WriteError(*perr); err != nil {
 					log.Println("... I/O error:", err)
 					return nil, err

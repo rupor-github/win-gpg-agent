@@ -162,7 +162,7 @@ func (p *Pipe) WriteDataReader(input io.Reader) error {
 
 	for {
 		n, err := input.Read(buf)
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return nil
 		}
 		if err != nil {
@@ -212,7 +212,7 @@ func (p *Pipe) WriteComment(text string) error {
 	return p.WriteLine("#", text)
 }
 
-// WriteError is a special case of WriteLine. It writes command.s
+// WriteError is a special case of WriteLine. It writes command.
 func (p *Pipe) WriteError(err Error) error {
 	return p.WriteLine("ERR", fmt.Sprintf("%d %s <%s>", MakeErrCode(err.Src, err.Code), err.Message, err.SrcName))
 }

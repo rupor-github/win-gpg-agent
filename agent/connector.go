@@ -49,6 +49,7 @@ func (ct ConnectorType) String() string {
 		return "ssh-agent socket"
 	case ConnectorPipeSSH:
 		return "ssh-agent named pipe"
+	default:
 	}
 	return fmt.Sprintf("unknown connector type %d", ct)
 }
@@ -117,6 +118,7 @@ func (c *Connector) Serve(deadline time.Duration) error {
 		return c.serveSSHSocket()
 	case ConnectorPipeSSH:
 		return c.serveSSHPipe()
+	default:
 	}
 	log.Printf("Connector for %s is not supported", c.index)
 	return nil
@@ -250,7 +252,7 @@ func (c *Connector) serveSSHPipe() error {
 		for {
 			conn, err := c.listener.Accept()
 			if err != nil {
-				if err != winio.ErrPipeListenerClosed {
+				if !errors.Is(err, winio.ErrPipeListenerClosed) {
 					log.Printf("Quiting - unable to serve on named pipe: %s", err)
 				}
 				return
@@ -410,7 +412,7 @@ func serveSSH(id int64, from io.ReadWriter, locked *int32) error {
 	var length [4]byte
 	for {
 		if _, err := io.ReadFull(from, length[:]); err != nil {
-			if err != io.EOF {
+			if errors.Is(err, io.EOF) {
 				return err
 			}
 			return nil // Done

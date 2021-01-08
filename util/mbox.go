@@ -16,7 +16,7 @@ var (
 
 // Windows SDK constants.
 const (
-	// How it will look
+	// How it will look.
 	MB_OK                = 0x00000000
 	MB_OKCANCEL          = 0x00000001
 	MB_ABORTRETRYIGNORE  = 0x00000002
@@ -33,13 +33,13 @@ const (
 	MB_ICONERROR         = MB_ICONHAND
 	MB_ICONINFORMATION   = MB_ICONASTERISK
 	MB_ICONSTOP          = MB_ICONHAND
-	// And behave
+	// And behave.
 	MB_DEFBUTTON1    = 0x00000000
 	MB_DEFBUTTON2    = 0x00000100
 	MB_DEFBUTTON3    = 0x00000200
 	MB_DEFBUTTON4    = 0x00000300
 	MB_SETFOREGROUND = 0x00010000
-	// Return values
+	// Return values.
 	IDOK     = 1
 	IDCANCEL = 2
 	IDABORT  = 3

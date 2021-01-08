@@ -14,9 +14,9 @@ const (
 	SSHAgentPipeName = "\\\\.\\pipe\\openssh-ssh-agent"
 	MaxNameLen       = windows.UNIX_PATH_MAX
 
-	// openssh-portable has it at 256 * 1024
-	// gpg-agent is using 16 * 1024
-	// Putty seems to have it at 8 + 1024
+	// openssh-portable has it at 256 * 1024.
+	// gpg-agent is using 16 * 1024.
+	// Putty seems to have it at 8 + 1024.
 	MaxAgentMsgLen = 256 * 1024
 
 	GPGAgentName           = "gpg-agent"

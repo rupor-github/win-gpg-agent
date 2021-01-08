@@ -68,7 +68,7 @@ func prepareAuthBuf(user string) (buf *uint8, size uint32) {
 	return
 }
 
-// quick and dirty
+// quick and dirty.
 func cleanLabel(str string) string {
 	space := regexp.MustCompile(`\s+`)
 	cleaner := strings.NewReplacer("\n", " ", "\r", " ")
@@ -92,7 +92,8 @@ const (
 
 	CREDUIWIN_GENERIC      = 0x1  // Return the user name and password in plain text.
 	CREDUIWIN_CHECKBOX     = 0x2  // The Save check box is displayed in the dialog box.
-	CREDUIWIN_IN_CRED_ONLY = 0x20 // Only the credentials specified by the pvInAuthBuffer parameter for the authentication package specified by the pulAuthPackage parameter should be enumerated.
+	CREDUIWIN_IN_CRED_ONLY = 0x20 // Only the credentials specified by the pvInAuthBuffer parameter
+	//                               for the authentication package specified by the pulAuthPackage parameter should be enumerated.
 )
 
 // PromptForWindowsCredentials calls Windows CredUI.dll to pupup "standard" Windows security dialog using provided description, prompt and a flag,

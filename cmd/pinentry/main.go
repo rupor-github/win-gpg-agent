@@ -25,7 +25,7 @@ var (
 	title   = "pinentry"
 	tooltip = "Pinentry program for GnuPG"
 	verStr  = fmt.Sprintf("%s (%s) %s", misc.GetVersion(), runtime.Version(), misc.GetGitHash())
-	// arguments
+	// Arguments.
 	cli         = getopt.New()
 	aConfigName = title + ".conf"
 	aShowHelp   bool
@@ -34,7 +34,7 @@ var (
 	aNoGrab     bool
 	aParent     uint64
 	aTimeout    int
-	// aDisplay, aTTYName, aTTYType, aLCType, aLCMessages string
+	// aDisplay, aTTYName, aTTYType, aLCType, aLCMessages string - not implemented.
 )
 
 func createCommonError(code common.ErrorCode, msg string) *common.Error {

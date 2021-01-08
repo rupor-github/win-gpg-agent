@@ -17,7 +17,7 @@ import (
 	"github.com/rupor-github/win-gpg-agent/assuan/common"
 )
 
-// Dial Asuan file socket on Windows - read contents of the target file and connect to a TCP port
+// Dial Asuan file socket on Windows - read contents of the target file and connect to a TCP port.
 func Dial(fn string) (net.Conn, error) {
 
 	f, err := os.Open(fn)
@@ -51,7 +51,7 @@ func Dial(fn string) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	} else if n != 16 {
-		err = fmt.Errorf("Read incorrect number of bytes for nonce. Expected 16, got %d (0x%X)", n, nonce)
+		err = fmt.Errorf("read incorrect number of bytes for nonce. Expected 16, got %d (0x%X)", n, nonce)
 		return nil, err
 	}
 
@@ -83,7 +83,7 @@ type Session struct {
 // Init initiates session using passed Reader/Writer.
 func Init(stream io.ReadWriter) (*Session, error) {
 	log.Println("Starting session...")
-	ses := &Session{common.New(stream)}
+	ses := &Session{Pipe: common.New(stream)}
 
 	// Take server's OK from pipe.
 	_, _, err := ses.Pipe.ReadLine()

@@ -73,9 +73,9 @@ func PrepareUserEnvironmentVariable(name, value string, wslenv, translate bool) 
 			vals = append(vals, part)
 		}
 	}
-	name = name + "/u"
+	name += "/u"
 	if translate {
-		name = name + "p"
+		name += "p"
 	}
 	vals = append(vals, name)
 	val = strings.Join(vals, ":")

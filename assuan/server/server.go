@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net"
@@ -128,8 +129,8 @@ func handleCmd(pipe *common.Pipe, cmd string, params string, proto ProtoInfo, st
 		if err != nil {
 			log.Println("... handler error:", err)
 
-			perr, ok := err.(*common.Error)
-			if ok {
+			var perr *common.Error
+			if ok := errors.As(err, &perr); ok {
 				if err := pipe.WriteError(*perr); err != nil {
 					log.Println("... IO error, dropping session:", err)
 					return err
@@ -217,9 +218,8 @@ func optionCmd(pipe *common.Pipe, state interface{}, proto ProtoInfo, params str
 	err := proto.SetOption(state, key, value)
 	if err != nil {
 		log.Println("... handler error:", err)
-
-		perr, ok := err.(*common.Error)
-		if ok {
+		var perr *common.Error
+		if ok := errors.As(err, &perr); ok {
 			if err := pipe.WriteError(*perr); err != nil {
 				return err
 			}

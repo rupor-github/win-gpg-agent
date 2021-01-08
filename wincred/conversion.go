@@ -49,7 +49,7 @@ func goBytes(src uintptr, len uint32) []byte {
 	return rv
 }
 
-// Convert the given CREDENTIAL struct to a more usable structure
+// Convert the given CREDENTIAL struct to a more usable structure.
 func sysToCredential(cred *sysCREDENTIAL) (result *Credential) {
 	if cred == nil {
 		return nil
@@ -76,8 +76,7 @@ func sysToCredential(cred *sysCREDENTIAL) (result *Credential) {
 	return result
 }
 
-// Convert the given Credential object back to a CREDENTIAL struct, which can be used for calling the
-// Windows APIs
+// Convert the given Credential object back to a CREDENTIAL struct, which can be used for calling the Windows APIs.
 func sysFromCredential(cred *Credential) (result *sysCREDENTIAL) {
 	if cred == nil {
 		return nil
