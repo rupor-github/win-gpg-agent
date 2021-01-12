@@ -88,7 +88,7 @@ gui:
   setenv: true
   ignore_session_lock: false
   deadline: 1m
-  pipe_name: \\\\.\\pipe\\openssh-ssh-agent
+  pipe_name: \\.\pipe\openssh-ssh-agent
   homedir: "${LOCALAPPDATA}\\gnupg"
   gclpr:
     port: 2850
