@@ -22,7 +22,7 @@ type GPGConfig struct {
 
 var defaultGPGConfig = `
 gpg:
-  install_path: "${HOMEDRIVE}\\Program Files (x86)\\gnupg"
+  install_path: "${ProgramFiles(x86)}\\Program Files (x86)\\gnupg"
   homedir: "${APPDATA}\\gnupg"
 `
 
