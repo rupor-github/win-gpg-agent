@@ -22,7 +22,7 @@ github.com/mitchellh/go-ps
 github.com/pborman/getopt/v2
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/rupor-github/gclpr v1.0.3
+# github.com/rupor-github/gclpr v1.1.0
 ## explicit
 github.com/rupor-github/gclpr/server
 # github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966

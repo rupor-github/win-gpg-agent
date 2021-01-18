@@ -27,8 +27,8 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
-github.com/rupor-github/gclpr v1.0.3 h1:rb8OlFmxpZBkwvC2VwVipd5SII+K7UuMJMAfidKViCM=
-github.com/rupor-github/gclpr v1.0.3/go.mod h1:w/KlGm6n3xw/FZpYHGe0uldhTaO77ydChR9IETLKBt0=
+github.com/rupor-github/gclpr v1.1.0 h1:m791F+5/uwxlpZgti4DByo4ee8Y1chE50b/JYUFahqg=
+github.com/rupor-github/gclpr v1.1.0/go.mod h1:i8D9sCY5y+FDWtKjtwdm+tXq2IeMOsZugz7vQU/L77o=
 github.com/sirupsen/logrus v1.4.1/go.mod h1:ni0Sbl8bgC9z8RoU9G6nDWqqs/fq4eDPysMBDgk/93Q=
 github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 h1:JIAuq3EEf9cgbU6AtGPK4CTG3Zf6CKMNqf0MHTggAUA=
 github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966/go.mod h1:sUM3LWHvSMaG192sy56D9F7CNvL7jUJVXoqM1QKLnog=

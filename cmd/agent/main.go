@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -188,8 +189,8 @@ func clipServe(cfg *config.Config) {
 	clipCtx, clipCancel = context.WithCancel(context.Background())
 	if len(cfg.GUI.Clp.Keys) > 0 {
 		var (
-			pkey  [32]byte
-			pkeys = make(map[[32]byte]struct{})
+			hpk, pkey [32]byte
+			pkeys     = make(map[[32]byte][32]byte)
 		)
 		for i, k := range cfg.GUI.Clp.Keys {
 			pk, err := hex.DecodeString(k)
@@ -197,15 +198,17 @@ func clipServe(cfg *config.Config) {
 				log.Printf("Bad gclpr public key %d. Ignoring", i)
 				continue
 			}
-			log.Printf("gclpr found public key: %s", k)
+			hpk = sha256.Sum256(pk)
 			copy(pkey[:], pk)
-			pkeys[pkey] = struct{}{}
+			pkeys[hpk] = pkey
+			log.Printf("gclpr found public key: %s [%s]", k, hex.EncodeToString(hpk[:]))
 		}
 		if len(pkeys) > 0 {
 			// we have possible clients for remote clipboard
 			clipHelp = fmt.Sprintf("gclpr is serving %d key(s) on port %d", len(pkeys), cfg.GUI.Clp.Port)
 			go func() {
-				if err := clip.Serve(clipCtx, cfg.GUI.Clp.Port, cfg.GUI.Clp.LE, pkeys); err != nil {
+				compatibleMagic := []byte{'g', 'c', 'l', 'p', 'r', 1, 1, 0}
+				if err := clip.Serve(clipCtx, cfg.GUI.Clp.Port, cfg.GUI.Clp.LE, pkeys, compatibleMagic); err != nil {
 					log.Printf("gclpr serve() returned error: %s", err.Error())
 					clipHelp = "gclpr is not running"
 				}
