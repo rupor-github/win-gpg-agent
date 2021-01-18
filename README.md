@@ -71,7 +71,7 @@ Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime ma
 - create and service named pipe for Windows native OpenSSH. Note, that both ssh AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
 - set environment variable `SSH_AUTH_SOCK` on Windows side and set it with proper pipe name so native OpenSSH tools know where to go.
 - create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME`, `WIN_AGENT_HOME`, `WSL_AGENT_HOME` environment variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation. Basically WSL_* would be paths on the Linux side and WIN_* are Windows ones. This way every WSL environment started after will have proper "unix" and "windows" paths available for easy scripting.
-- serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool.
+- serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool (NOTE: starting with v1.1.0 gclpr server backend enforces protocol versioning and may require upgrade of gclpr).
 
 You could always see what is going on by clicking "Status" on applet's menu:
 
