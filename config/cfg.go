@@ -38,6 +38,7 @@ type GUIConfig struct {
 	Debug             bool            `yaml:"debug,omitempty"`
 	SetEnv            bool            `yaml:"setenv,omitempty"`
 	IgnoreSessionLock bool            `yaml:"ignore_session_lock,omitempty"`
+	SSH               string          `yaml:"openssh,omitempty"`
 	PipeName          string          `yaml:"pipe_name,omitempty"`
 	Home              string          `yaml:"homedir,omitempty"`
 	Deadline          time.Duration   `yaml:"deadline,omitempty"`
@@ -49,6 +50,7 @@ var defaultGUIConfig = `
 gui:
   debug: false
   setenv: true
+  openssh: windows
   ignore_session_lock: false
   deadline: 1m
   pipe_name: %s

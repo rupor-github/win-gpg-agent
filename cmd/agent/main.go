@@ -94,18 +94,23 @@ func onSession(e systray.SessionEvent) {
 	}
 }
 
-func setVars() (func(), error) {
+func setVars(native bool) (func(), error) {
 
 	vars := []struct {
 		initialized         bool
 		name, value         string
 		register, translate bool
 	}{
+		{name: envPipeName, value: gpgAgent.Cfg.GUI.PipeName, register: false, translate: false},
 		{name: "WSL_" + envGPGHomeName, value: gpgAgent.Cfg.GPG.Home, register: true, translate: true},
 		{name: "WIN_" + envGPGHomeName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GPG.Home), register: true, translate: false},
 		{name: "WSL_" + envGUIHomeName, value: gpgAgent.Cfg.GUI.Home, register: true, translate: true},
 		{name: "WIN_" + envGUIHomeName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GUI.Home), register: true, translate: false},
-		{name: envPipeName, value: gpgAgent.Cfg.GUI.PipeName, register: false, translate: false},
+	}
+
+	if !native {
+		// set variable for Cygwin OpenSSH rather then for Windows OpenSSH
+		vars[0].value = gpgAgent.GetConnector(agent.ConnectorSockAgentCygwinSSH).PathGUI()
 	}
 
 	cleaner := func() {
@@ -138,6 +143,12 @@ func run() error {
 	// socket (WSL). NOTE: WSL2 requires additional layer of translation using socat on Linux side and either HYPER-V socket server or helper on Windows end
 	// since AF_UNIX interop is not (yet? ever?) implemented.
 
+	// Transact on Cygwin socket for ssh Cygwin/MSYS ports
+	if err := gpgAgent.Serve(agent.ConnectorSockAgentCygwinSSH); err != nil {
+		return err
+	}
+	defer gpgAgent.Close(agent.ConnectorSockAgentCygwinSSH)
+
 	// Transact on pipe for Windows openssh
 	if err := gpgAgent.Serve(agent.ConnectorPipeSSH); err != nil {
 		return err
@@ -163,7 +174,7 @@ func run() error {
 	defer gpgAgent.Close(agent.ConnectorSockAgentExtra)
 
 	if gpgAgent.Cfg.GUI.SetEnv {
-		cleaner, err := setVars()
+		cleaner, err := setVars(!strings.EqualFold(gpgAgent.Cfg.GUI.SSH, "cygwin"))
 		if err != nil {
 			return err
 		}

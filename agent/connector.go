@@ -34,6 +34,7 @@ const (
 	ConnectorSockAgentBrowser
 	ConnectorSockAgentSSH
 	ConnectorPipeSSH
+	ConnectorSockAgentCygwinSSH
 	maxConnector
 )
 
@@ -49,6 +50,8 @@ func (ct ConnectorType) String() string {
 		return "ssh-agent socket"
 	case ConnectorPipeSSH:
 		return "ssh-agent named pipe"
+	case ConnectorSockAgentCygwinSSH:
+		return "ssh-agent cygwin socket"
 	default:
 	}
 	return fmt.Sprintf("unknown connector type %d", ct)
@@ -84,11 +87,13 @@ func (c *Connector) Close() {
 	}
 	if err := c.listener.Close(); err != nil {
 		if !util.IsNetClosing(err) && !errors.Is(err, winio.ErrPipeListenerClosed) {
-			log.Printf("Error closing connector for %s: %s", c.index, err)
+			log.Printf("Error closing listener on connector for %s: %s", c.index, err)
 		}
 	}
 	if c.index != ConnectorPipeSSH && len(c.PathGUI()) != 0 {
-		_ = windows.Unlink(c.PathGUI())
+		if err := os.Remove(c.PathGUI()); err != nil {
+			log.Printf("Error closing connector for %s: %s", c.index, err.Error())
+		}
 	}
 }
 
@@ -118,6 +123,8 @@ func (c *Connector) Serve(deadline time.Duration) error {
 		return c.serveSSHSocket()
 	case ConnectorPipeSSH:
 		return c.serveSSHPipe()
+	case ConnectorSockAgentCygwinSSH:
+		return c.serveSSHCygwinSocket()
 	default:
 	}
 	log.Printf("Connector for %s is not supported", c.index)
@@ -206,8 +213,7 @@ func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 
 	_, err := os.Stat(socketName)
 	if err == nil || !os.IsNotExist(err) {
-		err = windows.Unlink(socketName)
-		if err != nil {
+		if err = os.Remove(socketName); err != nil {
 			return fmt.Errorf("failed to unlink socket %s: %w", socketName, err)
 		}
 	}
@@ -284,8 +290,7 @@ func (c *Connector) serveSSHSocket() error {
 
 	_, err := os.Stat(socketName)
 	if err == nil || !os.IsNotExist(err) {
-		err = windows.Unlink(socketName)
-		if err != nil {
+		if err = os.Remove(socketName); err != nil {
 			return fmt.Errorf("failed to unlink socket %s: %w", socketName, err)
 		}
 	}
@@ -304,6 +309,62 @@ func (c *Connector) serveSSHSocket() error {
 					log.Printf("Quiting - unable to serve on unix socket: %s", err)
 				}
 				return
+			}
+			c.wg.Add(1)
+			go func() {
+				defer c.wg.Done()
+				defer conn.Close()
+				id := time.Now().UnixNano() // create unique id for debug tracing
+				log.Printf("[%d] Accepted request from %s", id, socketName)
+				if err := serveSSH(id, conn, c.locked); err != nil {
+					log.Printf("[%d] SSH handler returned error: %s", id, err.Error())
+				}
+			}()
+		}
+	}()
+	return nil
+}
+
+func (c *Connector) serveSSHCygwinSocket() error {
+
+	if c == nil {
+		return fmt.Errorf("gpg agent has not been initialized properly")
+	}
+	socketName := c.PathGUI()
+	if len(socketName) > util.MaxNameLen {
+		return fmt.Errorf("socket name is too long: %d, max allowed: %d", len(socketName), util.MaxNameLen)
+	}
+
+	_, err := os.Stat(socketName)
+	if err == nil || !os.IsNotExist(err) {
+		if err = os.Remove(socketName); err != nil {
+			return fmt.Errorf("failed to unlink socket %s: %w", socketName, err)
+		}
+	}
+
+	c.listener, err = net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return fmt.Errorf("could not open cygwin socket: %w", err)
+	}
+
+	port := c.listener.Addr().(*net.TCPAddr).Port
+	nonce, err := util.CygwinCreateSocketFile(socketName, port)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		log.Printf("Serving %s on %s:%d with nonce: %s)", c.index, socketName, port, util.CygwinNonceString(nonce))
+		for {
+			conn, err := c.listener.Accept()
+			if err != nil {
+				if !util.IsNetClosing(err) {
+					log.Printf("Quiting - unable to serve on Cygwin socket: %s", err)
+				}
+				return
+			}
+			if err = util.CygwinPerformHandshake(conn, nonce); err != nil {
+				log.Printf("Unable to perform handshake on Cygwin socket: %s", err)
 			}
 			c.wg.Add(1)
 			go func() {

@@ -63,6 +63,7 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	a.conns[ConnectorSockAgentBrowser] = NewConnector(ConnectorSockAgentBrowser, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentBrowserName, locked, &a.wg)
 	a.conns[ConnectorSockAgentSSH] = NewConnector(ConnectorSockAgentSSH, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentSSHName, locked, &a.wg)
 	a.conns[ConnectorPipeSSH] = NewConnector(ConnectorPipeSSH, "", "", a.Cfg.GUI.PipeName, locked, &a.wg)
+	a.conns[ConnectorSockAgentCygwinSSH] = NewConnector(ConnectorSockAgentCygwinSSH, "", a.Cfg.GUI.Home, util.SocketAgentSSHCygwinName, locked, &a.wg)
 
 	util.WaitForFileDeparture(time.Second*5,
 		a.conns[ConnectorSockAgent].PathGPG(),
@@ -192,6 +193,13 @@ func (a *Agent) Start() error {
 	}()
 
 	return nil
+}
+
+func (a *Agent) GetConnector(ct ConnectorType) *Connector {
+	if a == nil || ct > maxConnector {
+		return nil
+	}
+	return a.conns[ct]
 }
 
 // Serve handles serving requests for a particular ConnectorType.

@@ -12,7 +12,7 @@
 
 Windows 10 has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https:/github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux.
 
-Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows 10 (console, terminal and all), WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
+Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows 10 (console, terminal and all), Cygwin/MSYS2 ssh tools and WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
 
 **DISCLAIMER** When using term `GnuPG` I am **not referring** to [GPG4Win](https://gpg4win.org), but rather to basic GnuPG tools built from code base common for all platforms. GPG4Win includes this set (which could be extracted), but normally it is available from GnuPG ftp site [ftp://ftp.gnupg.org](ftp://ftp.gnupg.org/gcrypt/binary/). It also could be installed by using [chocolatey](https://chocolatey.org/) command `choco install gnupg`. So no wonderful KDE GUIs ported to Windows. 
 
@@ -41,7 +41,10 @@ Download from the [releases page](https://github.com/rupor-github/win-gpg-agent/
 	Set-Service -StartupType Disabled ssh-agent
 ```
 
-3. Run `agent-gui.exe` 
+3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui.conf file. **NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
+
+4. Run `agent-gui.exe`
+
 
 Here is a diagram to show simplified relationship between parts: ![protocol](docs/pic1.png)
 
@@ -68,8 +71,9 @@ Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime ma
 - make sure that gpg-agent will use `pinentry.exe` from the same directory where agent-gui.exe is.
 - make sure that it functions by communicating with it.
 - create AF_UNIX socket counterparts for Assuan sockets from gpg-agent (except "browser" and "ssh" ones) and handle translation. I have no use for "browser" and S.gpg-agent.ssh presently does not work on Windows.
-- create and service named pipe for Windows native OpenSSH. Note, that both ssh AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
-- set environment variable `SSH_AUTH_SOCK` on Windows side and set it with proper pipe name so native OpenSSH tools know where to go.
+- create and service named pipe for Windows native OpenSSH. Note, that OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
+- create and service Cygwin socket for Cygwin/MSYS2 build of OpenSSH. Note, that OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
+- set environment variable `SSH_AUTH_SOCK` on Windows side to point either to pipe name so native OpenSSH tools know where to go or to Cygwin socket file to be used with Cygwin/MSYS2 ssh binaries.
 - create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME`, `WIN_AGENT_HOME`, `WSL_AGENT_HOME` environment variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation. Basically WSL_* would be paths on the Linux side and WIN_* are Windows ones. This way every WSL environment started after will have proper "unix" and "windows" paths available for easy scripting.
 - serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool (NOTE: starting with v1.1.0 gclpr server backend enforces protocol versioning and may require upgrade of gclpr).
 
@@ -86,6 +90,7 @@ gpg:
 gui:
   debug: false
   setenv: true
+  openssh: native
   ignore_session_lock: false
   deadline: 1m
   pipe_name: \\\\.\\pipe\\openssh-ssh-agent
@@ -102,6 +107,7 @@ Full list of configuration keys:
 * `gpg.gpg_agent_args` - array of additional arguments to be passed to gpg-agent on start. No checking is performed.
 * `gui.debug` - turn on debug logging. Uses `OutputDebugStringW` - use Sysinternals [debugview](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see
 * `gui.setenv` - automatically prepare environment variables
+* `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used instead of what comes with Windows 10.
 * `gui.ignore_session_lock` - continue to serve requests even if user session is locked
 * `gui.pipe_name` - full name of pipe for Windows OpenSSH
 * `gui.homedir` - directory to be used by agent-gui to create sockets in
