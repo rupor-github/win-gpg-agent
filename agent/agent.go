@@ -83,7 +83,7 @@ func (a *Agent) Status() string {
 	fmt.Fprintf(&buf, "\n\n---------------------------\nGnuPG version:\n---------------------------\n%s", a.Ver)
 	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent command line:\n---------------------------\n%s", a.cmd.String())
 	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent Assuan sockets directory:\n---------------------------\n%s", a.Cfg.GPG.Home)
-	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui AF_UNIX sockets directory:\n---------------------------\n%s", a.Cfg.GUI.Home)
+	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui AF_UNIX and Cygwin sockets directory:\n---------------------------\n%s", a.Cfg.GUI.Home)
 	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui SSH named pipe:\n---------------------------\n%s", a.Cfg.GUI.PipeName)
 
 	return buf.String()
@@ -195,8 +195,9 @@ func (a *Agent) Start() error {
 	return nil
 }
 
+// GetConnector returns pointer to requested connector or nil.
 func (a *Agent) GetConnector(ct ConnectorType) *Connector {
-	if a == nil || ct > maxConnector {
+	if a == nil || ct > maxConnector || len(a.conns) == 0 {
 		return nil
 	}
 	return a.conns[ct]
