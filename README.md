@@ -1,7 +1,7 @@
 <p align="center">
     <h1 align="center">win-gpg-agent</h1>
     <p align="center">
-		Simple set of tools to make working with GnuPG easier on Windows 10.
+		Simple set of tools to make working with GPG and SSH keys easier on Windows 10.
     </p>
     <p align="center">
         <a href="https://pkg.go.dev/mod/github.com/rupor-github/win-gpg-agent/?tab=packages"><img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-blue.svg" /></a>
