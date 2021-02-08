@@ -1,8 +1,4 @@
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-### This project() needed some refinements (mostly to keep up with go stdlib) so I forked it at v1.1.0 (78f93c1f8b99b0c2f6e7f3d2bdc4993cf87bddff)
-### and modified it slightly. I will keep it here with all original licensing intact - later I may submit PR upstream.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+This project needed some refinements (mostly to keep up with go stdlib) so I forked it at v1.1.0 (78f93c1f8b99b0c2f6e7f3d2bdc4993cf87bddff) and modified it slightly. I will keep it here with all original licensing intact - later I may submit PR upstream.
 
 wincred
 =======
