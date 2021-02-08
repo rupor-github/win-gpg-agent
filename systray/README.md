@@ -1,7 +1,4 @@
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-### This project only needed Windows specific functionality which I wanted to expand a bit, so I forked "github.com/getlantern/systray" at 2c0986dda9aea361e925f90e848d9036be7b5367
-### and modified it slightly. I have no intention to submit PR (since my modifications are specific), so I will keep it here with all original licensing intact.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+This project only needed Windows specific functionality which I wanted to expand a bit, so I forked "github.com/getlantern/systray" at 2c0986dda9aea361e925f90e848d9036be7b5367 and modified it slightly. I have no intention to submit PR (since my modifications are specific), so I will keep it here with all original licensing intact.
 
 systray is a cross-platform Go library to place an icon and menu in the notification area.
 
