@@ -1,8 +1,4 @@
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-### This project needed some Windows specific functionality and original "https://github.com/foxcpp/go-assuan" was mostly Linux so I forked it
-### at 5f169ecd9dc60f66706e60db814a48650ea53c3f and modified it slightly to see if this could be useful. I have no intention to submit PR 
-### (since my modifications are not significant and specific), so I will keep it here with all original licensing intact.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+This project needed some Windows specific functionality and original "https://github.com/foxcpp/go-assuan" was mostly Linux so I forked it at 5f169ecd9dc60f66706e60db814a48650ea53c3f and modified it slightly to see if this could be useful. I have no intention to submit PR (since my modifications are not significant and specific), so I will keep it here with all original licensing intact.
 
 go-assuan
 ===========
