@@ -98,10 +98,18 @@ endif()
 # Some contexts dependent settings
 ########################################################################################################
 
+list(APPEND GO_ENV
+    GOPATH=${GO_PATH}
+    GOOS=${CROSS_GOOS}
+    GOARCH=${CROSS_GOARCH}
+#    GO111MODULE=on
+#    GOPRIVATE=
+    )
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(TEST_RUN_ARGS "-v")
+    set(GO_ARGS "-mod=mod")
 else()
-    set(GO_MOD_ARGS "-mod=vendor")
+    set(GO_ARGS "-mod=vendor")
 endif()
 
 ########################################################################################################
@@ -110,10 +118,9 @@ endif()
 
 add_custom_target(bin_agent ALL
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/agent/resources.syso
-    COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH}
-        ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
+    COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
         -ldflags='-H=windowsgui'
-        ${GO_MOD_ARGS}
+        ${GO_ARGS}
         ./cmd/agent
     COMMENT "Building agent-gui..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
@@ -131,9 +138,8 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/agent/resources.syso
 
 add_custom_target(bin_pinentry ALL
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/pinentry/resources.syso
-    COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH}
-        ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
-        ${GO_MOD_ARGS}
+    COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
+        ${GO_ARGS}
         ./cmd/pinentry
     COMMENT "Building pinentry..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
@@ -151,9 +157,8 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/pinentry/resources.syso
 
 add_custom_target(bin_sorelay ALL
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/sorelay/resources.syso
-    COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH}
-        ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
-        ${GO_MOD_ARGS}
+    COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
+        ${GO_ARGS}
         ./cmd/sorelay
     COMMENT "Building sorelay..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
@@ -202,7 +207,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif()
 
     add_custom_target(lint
-        COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH} ${GO_LINTER} run
+        COMMAND ${GO_ENV} ${GO_LINTER} run
         COMMENT "Mega-linting project with ${GO_LINTER}..."
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
@@ -212,14 +217,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     add_custom_target(deps_tidy
         SOURCES ${PROJECT_SOURCE_DIR}/go.mod
-        COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH} ${GO_EXECUTABLE} mod tidy
+        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod tidy
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
         COMMENT "Cleaning dependencies (go mod tidy)"
         VERBATIM)
 
     add_custom_target(deps_vendor
         SOURCES ${PROJECT_SOURCE_DIR}/go.mod
-        COMMAND GOPATH=${GO_PATH} GO111MODULE=on GOOS=${CROSS_GOOS} GOARCH=${CROSS_GOARCH} ${GO_EXECUTABLE} mod vendor
+        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod vendor
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
         COMMENT "Creating vendor directory (go mod vendor)"
         VERBATIM)
