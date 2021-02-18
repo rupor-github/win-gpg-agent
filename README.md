@@ -14,7 +14,7 @@ Windows 10 has `ssh-agent` service (with support for persistence and Windows sec
 
 Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows 10 (console, terminal and all), Cygwin/MSYS2 ssh tools and WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
 
-**DISCLAIMER** When using term `GnuPG` I am **not referring** to [GPG4Win](https://gpg4win.org), but rather to basic GnuPG tools built from code base common for all platforms. GPG4Win includes this set (which could be extracted), but normally it is available from GnuPG ftp site [ftp://ftp.gnupg.org](ftp://ftp.gnupg.org/gcrypt/binary/). It also could be installed by using [chocolatey](https://chocolatey.org/) command `choco install gnupg`. So no wonderful KDE GUIs ported to Windows. 
+**DISCLAIMER** When using term `GnuPG` I am **not referring** to [GPG4Win](https://gpg4win.org), but rather to basic GnuPG tools built from code base common for all platforms. GPG4Win includes this set (which could be extracted), but normally it is available from GnuPG ftp site [ftp.gnupg.org](https://www.gnupg.org/ftp/gcrypt/binary/). It could be easily installed by using [chocolatey](https://chocolatey.org/) command `choco install gnupg` or [scoop](https://scoop.sh/) command `scoop install gnupg`. So no wonderful KDE GUIs ported to Windows. 
 
 I am still learning the full scope of damage one could cause by using GnuPG tools and I am certainly no expert here.
 
@@ -97,6 +97,14 @@ gui:
   homedir: "${LOCALAPPDATA}\\gnupg"
   gclpr:
     port: 2850
+```
+
+Note, that if you are using scoop you may want to update you configuration to account for "local" GnuPG installation:
+
+```
+gpg:
+  install_path: "${USERPROFILE}\\scoop\\apps\\gnupg\\current"
+  homedir: "${USERPROFILE}\\scoop\\apps\\gnupg\\current\\home"
 ```
 
 Full list of configuration keys:
