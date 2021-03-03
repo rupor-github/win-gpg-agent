@@ -12,5 +12,6 @@ _dist=bin
 )
 
 cd ${_dist}
-7z a -r ../win-gpg-agent
-
+zip -9 ../win-gpg-agent.zip *
+cd ..
+echo ${BUILD_PSWD} | minisign -S -s ~/.minisign/build.key -c "win-gpg-agent release signature" -m win-gpg-agent.zip

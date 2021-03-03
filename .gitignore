@@ -9,7 +9,9 @@
 *.mprof
 *.log
 *.7z
+*.zip
 *.syso
+*.minisig
 
 release/
 build/
