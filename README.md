@@ -30,7 +30,7 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 ## Installation
 
 Download from the [releases page](https://github.com/rupor-github/win-gpg-agent/releases) and unpack it in a convenient location.
-Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: ![key](docs/build_key.png =500x500) RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
+Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: ![key](docs/build_key.png) RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
 
 ## Usage
 
