@@ -1,0 +1,51 @@
+﻿{
+    "version": "@PRJ_VERSION_Major@.@PRJ_VERSION_Minor@.@PRJ_VERSION_Patch@",
+    "description": "Simple set of tools to make working with GPG and SSH keys easier on Windows 10.",
+    "homepage": "https://github.com/rupor-github/win-gpg-agent",
+    "license": "Apache-2.0",
+    "notes": [
+        "win-gpg-agent is configured to have SSH_AUTH_SOCK to point to named pipe.",
+        "If you prefer cygwin socket you could edit \"$dir\\agent-gui.conf\" file."
+    ],
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/rupor-github/test-scoop/releases/download/v@PRJ_VERSION_Major@.@PRJ_VERSION_Minor@.@PRJ_VERSION_Patch@/win-gpg-agent.zip",
+            "hash": "__CURRENT_HASH__"
+        }
+    },
+    "depends": {
+        "GnuPG": [ 
+            "gnupg"
+        ]
+    },
+    "pre_install": [
+        "if (!(Test-Path \"$dir\\agent-gui.conf\")) {",
+        "  $content = \"gpg:`r`n\"",
+        "  $content += \"  install_path: \"\"`$`{USERPROFILE`}\\\\scoop\\\\apps\\\\gnupg\\\\current\"\"`r`n\"",
+        "  $content += \"  homedir: \"\"`$`{USERPROFILE`}\\\\scoop\\\\apps\\\\gnupg\\\\current\\\\home\"\"`r`n\"",
+        "  $content += \"gui:`r`n\"",
+        "  $content += \"  debug: false`r`n\"",
+        "  $content += \"  setenv: true`r`n\"",
+        "  $content += \"  # Uncomment line below to enable SSH_AUTH_SOCK to point to cygwin socket`r`n\"",
+        "  $content += \"  #openssh: cygwin`r`n\"",
+        "  $content | Set-Content \"$dir\\agent-gui.conf\" -Encoding ASCII",
+        "}"
+    ],
+    "persist": "agent-gui.conf",
+    "shortcuts": [
+        [
+            "agent-gui.exe",
+            "win-gpg-agent"
+        ]
+    ],
+    "checkver": {
+        "github": "https://github.com/rupor-github/test-scoop"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/rupor-github/test-scoop/releases/download/v$version/win-gpg-agent.zip"
+            }
+        }
+    }
+}

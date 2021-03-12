@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
 
 message(STATUS "Running cmake version ${CMAKE_VERSION}")
 if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -34,9 +34,6 @@ else()
     message(FATAL_ERROR "Currently unsuppored environment \"${MSYSTEM_NAME}\". CMake willl exit now.")
 endif()
 
-set(DEST_DIR "${PROJECT_SOURCE_DIR}/bin")
-message(STATUS "Installation directory: ${DEST_DIR}")
-
 find_package(Go 1.15 REQUIRED)
 find_package(Git REQUIRED)
 
@@ -59,7 +56,7 @@ endif()
 # Project version number
 set(PRJ_VERSION_Major "1")
 set(PRJ_VERSION_Minor "2")
-set(PRJ_VERSION_Patch "2")
+set(PRJ_VERSION_Patch "3")
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/.git" AND IS_DIRECTORY "${PROJECT_SOURCE_DIR}/.git")
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/cmake/githash.sh ${GIT_EXECUTABLE}
@@ -80,10 +77,10 @@ configure_file("${PROJECT_SOURCE_DIR}/cmake/pinentry.rc.in" "${PROJECT_SOURCE_DI
 configure_file("${PROJECT_SOURCE_DIR}/cmake/pinentry.xml.in" "${PROJECT_SOURCE_DIR}/cmd/pinentry/manifest.xml")
 configure_file("${PROJECT_SOURCE_DIR}/cmake/sorelay.rc.in" "${PROJECT_SOURCE_DIR}/cmd/sorelay/resources.rc")
 configure_file("${PROJECT_SOURCE_DIR}/cmake/sorelay.xml.in" "${PROJECT_SOURCE_DIR}/cmd/sorelay/manifest.xml")
+configure_file("${PROJECT_SOURCE_DIR}/cmake/win-gpg-agent.json.in" "${PROJECT_SOURCE_DIR}/win-gpg-agent.json")
 
 # distribute history
 execute_process(COMMAND ${CMAKE_COMMAND} -E env ${GIT_EXECUTABLE} changelog --all --tag "v${PRJ_VERSION_Major}.${PRJ_VERSION_Minor}.${PRJ_VERSION_Patch}" --stdout OUTPUT_FILE ${PROJECT_BINARY_DIR}/changelog.txt ERROR_QUIET)
-install(FILES ${PROJECT_BINARY_DIR}/changelog.txt DESTINATION ${DEST_DIR} CONFIGURATIONS Release)
 
 message(STATUS "Building version \"${PRJ_VERSION_Major}.${PRJ_VERSION_Minor}.${PRJ_VERSION_Patch}\" git \"${GIT_HASH}\"")
 
@@ -102,8 +99,6 @@ list(APPEND GO_ENV
     GOPATH=${GO_PATH}
     GOOS=${CROSS_GOOS}
     GOARCH=${CROSS_GOARCH}
-#    GO111MODULE=on
-#    GOPRIVATE=
     )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -116,7 +111,29 @@ endif()
 # main target - always out of date, "go build" will figure it out
 ########################################################################################################
 
+add_custom_target(release
+    DEPENDS ${PROJECT_SOURCE_DIR}/win-gpg-agent.zip
+        ${PROJECT_SOURCE_DIR}/win-gpg-agent.json
+    COMMAND ${CMAKE_SOURCE_DIR}/cmake/sign.sh
+    COMMENT "Building release..."
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/win-gpg-agent.zip
+    DEPENDS ${PROJECT_BINARY_DIR}/changelog.txt
+        ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
+        ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
+        ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
+    COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${PROJECT_SOURCE_DIR}/win-gpg-agent.zip --format=zip
+        changelog.txt agent-gui${CMAKE_EXECUTABLE_SUFFIX} pinentry${CMAKE_EXECUTABLE_SUFFIX} sorelay${CMAKE_EXECUTABLE_SUFFIX}
+    COMMENT "Archiving release..."
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+
+# shortcut
 add_custom_target(bin_agent ALL
+    DEPENDS ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/agent/resources.syso
     COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
         -ldflags='-H=windowsgui'
@@ -124,7 +141,6 @@ add_custom_target(bin_agent ALL
         ./cmd/agent
     COMMENT "Building agent-gui..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-install(PROGRAMS ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX} DESTINATION ${DEST_DIR} CONFIGURATIONS Release)
 
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/agent/resources.syso
      DEPENDS ${PROJECT_SOURCE_DIR}/cmd/agent/resources.rc
@@ -136,14 +152,18 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/agent/resources.syso
      WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
      COMMENT "Building agent-gui resources...")
 
+# shortcut
 add_custom_target(bin_pinentry ALL
+    DEPENDS ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/pinentry/resources.syso
     COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX}
         ${GO_ARGS}
         ./cmd/pinentry
     COMMENT "Building pinentry..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-install(PROGRAMS ${PROJECT_BINARY_DIR}/pinentry${CMAKE_EXECUTABLE_SUFFIX} DESTINATION ${DEST_DIR} CONFIGURATIONS Release)
 
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/pinentry/resources.syso
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/pinentry/resources.rc
@@ -155,14 +175,18 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/pinentry/resources.syso
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     COMMENT "Building pinentry resources...")
 
+# shortcut
 add_custom_target(bin_sorelay ALL
+    DEPENDS ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/sorelay/resources.syso
     COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX}
         ${GO_ARGS}
         ./cmd/sorelay
     COMMENT "Building sorelay..."
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-install(PROGRAMS ${PROJECT_BINARY_DIR}/sorelay${CMAKE_EXECUTABLE_SUFFIX} DESTINATION ${DEST_DIR} CONFIGURATIONS Release)
 
 add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/cmd/sorelay/resources.syso
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/sorelay/resources.rc

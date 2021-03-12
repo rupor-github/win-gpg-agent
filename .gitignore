@@ -9,15 +9,14 @@
 *.mprof
 *.log
 *.7z
-*.zip
 *.syso
-*.minisig
 
-release/
 build/
-bin/
 
 # build specific
 misc/version.go
 cmd/*/resources.rc
 cmd/*/manifest.xml
+win-gpg-agent.zip
+win-gpg-agent.zip.minisig
+win-gpg-agent.json

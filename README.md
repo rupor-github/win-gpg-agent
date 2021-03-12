@@ -33,6 +33,17 @@ Download from the [releases page](https://github.com/rupor-github/win-gpg-agent/
 
 Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: ![key](docs/build_key.png) RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
 
+Starting with v1.2.3 you can install win-gpg-agent using scoop:
+```
+    scoop install https://github.com/rupor-github/test-scoop/releases/latest/download/win-gpg-agent.json
+```
+and when installed this way update simply works
+```
+    scoop update win-gpg-agent
+``` 
+
+Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://github.com/gpailler) for help and inspiration.
+
 ## Usage
 
 1. Install GnuPG and make sure it works. Create/import keys, setup smart cards, etc. 
@@ -99,14 +110,6 @@ gui:
   homedir: "${LOCALAPPDATA}\\gnupg"
   gclpr:
     port: 2850
-```
-
-Note, that if you are using scoop you may want to update you configuration to account for "local" GnuPG installation:
-
-```
-gpg:
-  install_path: "${USERPROFILE}\\scoop\\apps\\gnupg\\current"
-  homedir: "${USERPROFILE}\\scoop\\apps\\gnupg\\current\\home"
 ```
 
 Full list of configuration keys:
