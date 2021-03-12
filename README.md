@@ -35,7 +35,7 @@ Starting with v1.2.2 releases are packed with zip and signed with [minisign](htt
 
 Starting with v1.2.3 you can install win-gpg-agent using scoop:
 ```
-    scoop install https://github.com/rupor-github/test-scoop/releases/latest/download/win-gpg-agent.json
+    scoop install https://github.com/rupor-github/win-gpg-agent/releases/latest/download/win-gpg-agent.json
 ```
 and when installed this way update simply works
 ```
