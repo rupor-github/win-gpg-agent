@@ -29,24 +29,24 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 
 ## Installation
 
-Download from the [releases page](https://github.com/rupor-github/win-gpg-agent/releases) and unpack it in a convenient location.
+Starting with v1.2.3 win-gpg-agent can be installed and updated using [scoop](https://scoop.sh/). Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://github.com/gpailler) for help and inspiration.
 
-Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: ![key](docs/build_key.png) RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
-
-Starting with v1.2.3 you can install win-gpg-agent using scoop:
+Installing:
 ```
     scoop install https://github.com/rupor-github/win-gpg-agent/releases/latest/download/win-gpg-agent.json
 ```
-and when installed this way update simply works
+and updating:
 ```
     scoop update win-gpg-agent
 ``` 
 
-Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://github.com/gpailler) for help and inspiration.
+Alternatively download archive from the [releases page](https://github.com/rupor-github/win-gpg-agent/releases) and unpack it in a convenient location.
+
+Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: ![key](docs/build_key.png) RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
 
 ## Usage
 
-1. Install GnuPG and make sure it works. Create/import keys, setup smart cards, etc. 
+1. Make sure GnuPG works. Create/import keys, setup smart cards, etc.
 
 2. If you are using Windows native ssh-agent - stop it. You may want to delete all keys from its vault - you will need those keys in gpg vault instead.
 ```
@@ -54,7 +54,9 @@ Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://g
 	Set-Service -StartupType Disabled ssh-agent
 ```
 
-3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui.conf file. **NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
+3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui.config file. 
+
+**NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
 
 4. Run `agent-gui.exe`
 
