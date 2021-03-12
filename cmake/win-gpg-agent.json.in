@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "@PRJ_VERSION_Major@.@PRJ_VERSION_Minor@.@PRJ_VERSION_Patch@",
     "description": "Simple set of tools to make working with GPG and SSH keys easier on Windows 10.",
     "homepage": "https://github.com/rupor-github/win-gpg-agent",
@@ -9,7 +9,7 @@
     ],
     "architecture": {
         "64bit": {
-            "url": "https://github.com/rupor-github/test-scoop/releases/download/v@PRJ_VERSION_Major@.@PRJ_VERSION_Minor@.@PRJ_VERSION_Patch@/win-gpg-agent.zip",
+            "url": "https://github.com/rupor-github/win-gpg-agent/releases/download/v@PRJ_VERSION_Major@.@PRJ_VERSION_Minor@.@PRJ_VERSION_Patch@/win-gpg-agent.zip",
             "hash": "__CURRENT_HASH__"
         }
     },
@@ -39,12 +39,12 @@
         ]
     ],
     "checkver": {
-        "github": "https://github.com/rupor-github/test-scoop"
+        "github": "https://github.com/rupor-github/win-gpg-agent"
     },
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/rupor-github/test-scoop/releases/download/v$version/win-gpg-agent.zip"
+                "url": "https://github.com/rupor-github/win-gpg-agent/releases/download/v$version/win-gpg-agent.zip"
             }
         }
     }
