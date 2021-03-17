@@ -100,16 +100,16 @@ Reasonable defaults are provided (but could be changed by using configuration fi
 
 ```
 gpg:
-  install_path: "${ProgramFiles(x86)}\\gnupg"
-  homedir: "${APPDATA}\\gnupg"
+  install_path: "${ProgramFiles(x86)}\gnupg"
+  homedir: "${APPDATA}\gnupg"
 gui:
   debug: false
   setenv: true
   openssh: native
   ignore_session_lock: false
   deadline: 1m
-  pipe_name: \\\\.\\pipe\\openssh-ssh-agent
-  homedir: "${LOCALAPPDATA}\\gnupg"
+  pipe_name: \\.\pipe\openssh-ssh-agent
+  homedir: "${LOCALAPPDATA}\gnupg"
   gclpr:
     port: 2850
 ```
