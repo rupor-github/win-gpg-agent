@@ -54,7 +54,7 @@ Starting with v1.2.2 releases are packed with zip and signed with [minisign](htt
 	Set-Service -StartupType Disabled ssh-agent
 ```
 
-3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui.config file. 
+3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui config file. 
 
 **NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
 
