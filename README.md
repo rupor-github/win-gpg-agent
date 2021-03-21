@@ -46,7 +46,7 @@ Starting with v1.2.2 releases are packed with zip and signed with [minisign](htt
 
 ## Usage
 
-1. Make sure GnuPG works. Create/import keys, setup smart cards, etc. **NOTE** Usage of WSL1/WSL2 distribution (which seems local and Windows) does not mean that you should directly share gpg databases from Windows end even if you technically could. For all means and purposes those are "remote" cases - the only difference I could think of is usage of `S.gpg-agent` socket rather than more restricted `S.gpg-agent.extra` socket. Multiple WSL1 instances could probably share database and multiple WSL2 instances could probably share databases, but in general each distro should have its own. If you need more details - read gpg man pages. To put it simply: you still need to export **public** keys on Windows end and import them on remote end, even if this means simply using
+1. Make sure GnuPG works. Create/import keys, setup smart cards, etc. **NOTE** that WSL1/WSL2 distribution use case (while seems local and Windows native) does not mean that you should directly share gpg databases from Windows end even if you technically could. For all means and purposes those are "remote" cases - the only difference I could think of is usage of `S.gpg-agent` socket rather than more restricted `S.gpg-agent.extra` socket. Multiple WSL1 instances could probably share database and multiple WSL2 instances could probably share databases, but in general each distro should have its own. If you need more details - read gpg man pages. To put it simply: you still need to export **public** keys on Windows end and import them on remote end, even if this means simply using
 ```
     gpg --export --armor user@example.org ...
     gpg --import ...
@@ -54,13 +54,11 @@ Starting with v1.2.2 releases are packed with zip and signed with [minisign](htt
 
 2. If you are using Windows native ssh-agent - stop it. You may want to delete all keys from its vault - you will need those keys in gpg vault instead.
 ```
-	Stop-Service ssh-agent
-	Set-Service -StartupType Disabled ssh-agent
+    Stop-Service ssh-agent
+    Set-Service -StartupType Disabled ssh-agent
 ```
 
-3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui config file. 
-
-**NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
+3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui config file. **NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
 
 4. Run `agent-gui.exe`
 
