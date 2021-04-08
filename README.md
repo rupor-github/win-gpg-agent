@@ -25,7 +25,7 @@ If you are interested in basic guides on how to handle keys using GnuPG tools - 
 **SECURITY NOTICE:** All the usual security caveats applicable to WSL, SSH and GPG apply here. For example all interaction with the Win32 world happens with the credentials of the user who started the WSL environment. In practice, *if you allow someone else to log in to your WSL environment remotely, they may be able to access the SSH keys stored in
 your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of what you're doing, do not allow remote access to your WSL environment (i.e. by starting an SSH server).
 
-**COMPATIBILITY NOTICE:** tools from this project were tested on Windows 10 2004 with multiple distributions and should work on anything starting with 1809 - beginning with insider build 17063 and would not work on older versions of Windows 10, because it requires [AF_UNIX socket support](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/) feature. I tested everything with "official" GnuPG Windows builds 2.2.25 and 2.2.26.
+**COMPATIBILITY NOTICE:** tools from this project were tested on Windows 10 2004 with multiple distributions and should work on anything starting with 1809 - beginning with insider build 17063 and would not work on older versions of Windows 10, because it requires [AF_UNIX socket support](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/) feature. I tested everything with "official" GnuPG LTS Windows build 2.2.27.
 
 ## Installation
 
