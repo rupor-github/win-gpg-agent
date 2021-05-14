@@ -40,6 +40,7 @@ type GUIConfig struct {
 	IgnoreSessionLock bool            `yaml:"ignore_session_lock,omitempty"`
 	SSH               string          `yaml:"openssh,omitempty"`
 	PipeName          string          `yaml:"pipe_name,omitempty"`
+	ExtraPort         int             `yaml:"extra_port,omitempty"`
 	Home              string          `yaml:"homedir,omitempty"`
 	Deadline          time.Duration   `yaml:"deadline,omitempty"`
 	PinDlg            util.DlgDetails `yaml:"pin_dialog,omitempty"`

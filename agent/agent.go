@@ -64,6 +64,10 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	a.conns[ConnectorSockAgentSSH] = NewConnector(ConnectorSockAgentSSH, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentSSHName, locked, &a.wg)
 	a.conns[ConnectorPipeSSH] = NewConnector(ConnectorPipeSSH, "", "", a.Cfg.GUI.PipeName, locked, &a.wg)
 	a.conns[ConnectorSockAgentCygwinSSH] = NewConnector(ConnectorSockAgentCygwinSSH, "", a.Cfg.GUI.Home, util.SocketAgentSSHCygwinName, locked, &a.wg)
+	if a.Cfg.GUI.ExtraPort != 0 {
+		// Since OpenSSH-Win32 does not yet know how to redirect unix sockets we have no choice but to make available this additional port on local host only
+		a.conns[ConnectorExtraPort] = NewConnector(ConnectorExtraPort, a.Cfg.GPG.Home, fmt.Sprintf("localhost:%d", a.Cfg.GUI.ExtraPort), util.SocketAgentExtraName, locked, &a.wg)
+	}
 
 	util.WaitForFileDeparture(time.Second*5,
 		a.conns[ConnectorSockAgent].PathGPG(),
@@ -83,6 +87,9 @@ func (a *Agent) Status() string {
 	fmt.Fprintf(&buf, "\n\n---------------------------\nGnuPG version:\n---------------------------\n%s", a.Ver)
 	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent command line:\n---------------------------\n%s", a.cmd.String())
 	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent Assuan sockets directory:\n---------------------------\n%s", a.Cfg.GPG.Home)
+	if a.Cfg.GUI.ExtraPort != 0 {
+		fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent Assuan extra socket on TCP:\n---------------------------\nlocalhost:%d", a.Cfg.GUI.ExtraPort)
+	}
 	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui AF_UNIX and Cygwin sockets directory:\n---------------------------\n%s", a.Cfg.GUI.Home)
 	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui SSH named pipe:\n---------------------------\n%s", a.Cfg.GUI.PipeName)
 

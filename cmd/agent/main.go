@@ -161,6 +161,14 @@ func run() error {
 	}
 	defer gpgAgent.Close(agent.ConnectorSockAgentSSH)
 
+	// Transact on local tcp ocket for gpg agent
+	if gpgAgent.Cfg.GUI.ExtraPort != 0 {
+		if err := gpgAgent.Serve(agent.ConnectorExtraPort); err != nil {
+			return err
+		}
+		defer gpgAgent.Close(agent.ConnectorExtraPort)
+	}
+
 	// Transact on AF_UNIX socket for gpg agent
 	if err := gpgAgent.Serve(agent.ConnectorSockAgent); err != nil {
 		return err
@@ -216,7 +224,7 @@ func clipServe(cfg *config.Config) {
 		}
 		if len(pkeys) > 0 {
 			// we have possible clients for remote clipboard
-			clipHelp = fmt.Sprintf("gclpr is serving %d key(s) on port %d", len(pkeys), cfg.GUI.Clp.Port)
+			clipHelp = fmt.Sprintf("---------------------------\ngclpr is serving %d key(s) on port %d", len(pkeys), cfg.GUI.Clp.Port)
 			go func() {
 				compatibleMagic := []byte{'g', 'c', 'l', 'p', 'r', 1, 1, 0}
 				if err := clip.Serve(clipCtx, cfg.GUI.Clp.Port, cfg.GUI.Clp.LE, pkeys, compatibleMagic); err != nil {

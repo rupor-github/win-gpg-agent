@@ -34,7 +34,7 @@ else()
     message(FATAL_ERROR "Currently unsuppored environment \"${MSYSTEM_NAME}\". CMake willl exit now.")
 endif()
 
-find_package(Go 1.15 REQUIRED)
+find_package(Go 1.16 REQUIRED)
 find_package(Git REQUIRED)
 
 # Make sure we setup go properly
@@ -55,8 +55,8 @@ endif()
 
 # Project version number
 set(PRJ_VERSION_Major "1")
-set(PRJ_VERSION_Minor "2")
-set(PRJ_VERSION_Patch "3")
+set(PRJ_VERSION_Minor "3")
+set(PRJ_VERSION_Patch "0")
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/.git" AND IS_DIRECTORY "${PROJECT_SOURCE_DIR}/.git")
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/cmake/githash.sh ${GIT_EXECUTABLE}

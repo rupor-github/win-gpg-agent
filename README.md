@@ -125,6 +125,7 @@ Full list of configuration keys:
 * `gui.debug` - turn on debug logging. Uses `OutputDebugStringW` - use Sysinternals [debugview](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see
 * `gui.setenv` - automatically prepare environment variables
 * `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used instead of what comes with Windows 10.
+* `gui.extra_port` - Win32-OpenSSH does not know how to redirect unix sockets yet, so if you want to use windows native ssh to remote "S.gpg-agent.extra" specify some non-zero port here. Program will open this port on localhost and you can use socat on the other side to recreate domain socket. By default it is disabled.
 * `gui.ignore_session_lock` - continue to serve requests even if user session is locked
 * `gui.pipe_name` - full name of pipe for Windows OpenSSH
 * `gui.homedir` - directory to be used by agent-gui to create sockets in
@@ -327,6 +328,11 @@ Using SSH and Linux you could remote GnuPG extra socket as far as you want by ad
 ```
 RemoteForward /home/rupor/.gnupg/S.gpg-agent /home/rupor/.gnupg/S.gpg-agent.extra
 ```
+In case you prefer to use Win32-OpenSSH you will need to set `gui.extra_port` in configuration and RemoteForward it, using something like
+```
+socat UNIX-LISTEN:/run/user/1000/gnupg/S.gpg-agent,fork TCP4-CONNECT:127.0.0.1:$extra_port
+```
+on remote to recreate domain socket.
 
 Just follow [this guide](https://gist.github.com/TimJDFletcher/85fafd023c81aabfad57454111c1564d) - it will allow you to sign you git commits everywhere using single private key while keeping it in a single safe place (like smart card). You will still have to distribute and import public key in multiple places, which may be inconvenient but should be secure. You could [read a bit more](https://www.gnupg.org/gph/en/manual/x56.html#:~:text=To%20send%20your%20public%20key,identify%20the%20key%20to%20export.) on that.
 

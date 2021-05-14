@@ -35,6 +35,7 @@ const (
 	ConnectorSockAgentSSH
 	ConnectorPipeSSH
 	ConnectorSockAgentCygwinSSH
+	ConnectorExtraPort
 	maxConnector
 )
 
@@ -52,6 +53,8 @@ func (ct ConnectorType) String() string {
 		return "ssh-agent named pipe"
 	case ConnectorSockAgentCygwinSSH:
 		return "ssh-agent cygwin socket"
+	case ConnectorExtraPort:
+		return "gpg-agent extra socket on local port"
 	default:
 	}
 	return fmt.Sprintf("unknown connector type %d", ct)
@@ -125,6 +128,8 @@ func (c *Connector) Serve(deadline time.Duration) error {
 		return c.serveSSHPipe()
 	case ConnectorSockAgentCygwinSSH:
 		return c.serveSSHCygwinSocket()
+	case ConnectorExtraPort:
+		return c.serveExtraPortSocket(deadline)
 	default:
 	}
 	log.Printf("Connector for %s is not supported", c.index)
@@ -230,6 +235,37 @@ func (c *Connector) serveAssuanSocket(deadline time.Duration) error {
 			if err != nil {
 				if !util.IsNetClosing(err) {
 					log.Printf("Quiting - unable to serve on unix socket: %s", err.Error())
+				}
+				return
+			}
+			c.wg.Add(1)
+			go c.handleAssuanRequest(socketName, conn, deadline)
+		}
+	}()
+	return nil
+}
+
+func (c *Connector) serveExtraPortSocket(deadline time.Duration) error {
+
+	if c == nil || len(c.pathGPG) == 0 || len(c.pathGUI) == 0 {
+		return fmt.Errorf("gpg agent has not been initialized properly")
+	}
+
+	var err error
+
+	socketName := c.pathGUI
+	c.listener, err = net.Listen("tcp", socketName)
+	if err != nil {
+		return fmt.Errorf("could not open socket %s: %w", socketName, err)
+	}
+
+	go func() {
+		log.Printf("Serving %s on %s", c.index, socketName)
+		for {
+			conn, err := c.listener.Accept()
+			if err != nil {
+				if !util.IsNetClosing(err) {
+					log.Printf("Quiting - unable to serve on TCP socket: %s", err.Error())
 				}
 				return
 			}
