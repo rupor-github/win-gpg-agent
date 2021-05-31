@@ -58,7 +58,11 @@ Starting with v1.2.2 releases are packed with zip and signed with [minisign](htt
     Set-Service -StartupType Disabled ssh-agent
 ```
 
-3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui config file. **NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on Windows side. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
+3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui config file. Or you may add following line to your home directory .bashrc:
+```
+    export SSH_AUTH_SOCK=$(cygpath ${WSL_AGENT_HOME})/S.gpg-agent.ssh.cyg
+```
+**NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on on either side per environment. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__. 
 
 4. Run `agent-gui.exe`
 
@@ -125,7 +129,7 @@ Full list of configuration keys:
 * `gpg.gpg_agent_args` - array of additional arguments to be passed to gpg-agent on start. No checking is performed.
 * `gui.debug` - turn on debug logging. Uses `OutputDebugStringW` - use Sysinternals [debugview](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see
 * `gui.setenv` - automatically prepare environment variables
-* `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used instead of what comes with Windows 10.
+* `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used by default instead of what comes with Windows 10.
 * `gui.extra_port` - Win32-OpenSSH does not know how to redirect unix sockets yet, so if you want to use windows native ssh to remote "S.gpg-agent.extra" specify some non-zero port here. Program will open this port on localhost and you can use socat on the other side to recreate domain socket. By default it is disabled.
 * `gui.ignore_session_lock` - continue to serve requests even if user session is locked
 * `gui.pipe_name` - full name of pipe for Windows OpenSSH
