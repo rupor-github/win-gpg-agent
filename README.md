@@ -32,11 +32,11 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 Starting with v1.2.3 win-gpg-agent can be installed and updated using [scoop](https://scoop.sh/). Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://github.com/gpailler) for help and inspiration.
 
 Installing:
-```
+```powershell
     scoop install https://github.com/rupor-github/win-gpg-agent/releases/latest/download/win-gpg-agent.json
 ```
 and updating:
-```
+```powershell
     scoop update win-gpg-agent
 ``` 
 
@@ -53,13 +53,13 @@ Starting with v1.2.2 releases are packed with zip and signed with [minisign](htt
 ```
 
 2. If you are using Windows native ssh-agent - stop it. You may want to delete all keys from its vault - you will need those keys in gpg vault instead.
-```
+```powershell
     Stop-Service ssh-agent
     Set-Service -StartupType Disabled ssh-agent
 ```
 
 3. If you would like to use Cygwin/MSYS2 ssh tools (as is the case by default with [Git4Windows](https://gitforwindows.org/)) you may want to consider placing `gui.openssh: cygwin` in agent-gui config file. Or you may add following line to your home directory .bashrc:
-```
+```bash
     export SSH_AUTH_SOCK=$(cygpath ${WSL_AGENT_HOME})/S.gpg-agent.ssh.cyg
 ```
 **NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on on either side per environment. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__. 
@@ -105,7 +105,7 @@ You could always see what is going on by clicking "Status" on applet's menu:
 
 Reasonable defaults are provided (but could be changed by using configuration file). Full path to configuration file could be provided on command line. If not program will look for `agent-gui.conf` in the same directory where executable is. It is YAML file with following defaults:
 
-```
+```yaml
 gpg:
   install_path: "${ProgramFiles(x86)}\\gnupg"
   homedir: "${APPDATA}\\gnupg"
@@ -165,7 +165,7 @@ If you let it - it will save passwords in Windows Credential Manager as "Generic
 
 Configuration file is almost never needed, but just in case full path to configuration file could be provided on command line. If not program will look for `pinentry.conf` in the same directory where executable is. It is YAML file with following defaults:
 
-```
+```yaml
 gui:
   debug: false
   pin_dialog:
@@ -195,19 +195,19 @@ Usage: sorelay.exe [-adh] [-c path] [--version] path-to-socket
 This is helper program along the lines of John Starks' [npiperelay.exe](https://github.com/jstarks/npiperelay). Put it somewhere on devfs for interop to work its magic and combine with socat on WSL2 side and you could easily convert both Windows Assuan and Windows AF_UNIX sockets into sockets on WSL2 Linux end.
 
 As an example (with proper path) following will translate Windows side Assuan socket:
-```
+```bash
 ( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a c:/Users/mike0/AppData/Roaming/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
 ```
 
 And this (with proper path) will translate Windows side AF_UNIX socket:
-```
+```bash
 ( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe c:/Users/mike0/AppData/Local/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
 ```
 You *really* have to be on WSL2 in order for this to work - if you see errors like `Cannot open netlink socket: Protocol not supported` - you probably are under WSL1 and should just use AF_UNIX sockets directly. Run `wsl.exe -l --all -v` to check what is going on. When on WSL2 make sure that socat is installed and sorelay.exe is on windows partition and path is right.
 
 Configuration file is never needed, but just in case full path to configuration file could be provided on command line. If not program will look for `sorelay.conf` in the same directory where executable is. It is YAML file with following defaults:
 
-```
+```yaml
 gui:
   debug: false
 ```
@@ -222,7 +222,7 @@ I auto-start `agent-gui.exe` on logon on my Windows box - no special customizati
 
 In my .bashrc I detect what I have and where it runs using code like this:
 
-```
+```bash
     # detect what we have
     if [  $(uname -a | grep -c "Microsoft") -eq 1 ]; then
         export ISWSL=1 # WSL 1
@@ -281,7 +281,7 @@ RemoteForward 2850 127.0.0.1:2850
 ```
 
 On `remote` my `tmux.conf` includes following lines:
-```
+```tmux
 # --- clipboard -------------------------------------------------------------------
 set -g set-clipboard off
 if-shell 'if [ -n ${WSL_DISTRO_NAME} ]; then true; else false; fi' \
@@ -290,7 +290,7 @@ if-shell 'if [ -n ${WSL_DISTRO_NAME} ]; then true; else false; fi' \
 ```
 
 And my `neovim` configuration file `init.vim` on `remote` has following lines:
-```
+```vim
 set clipboard+=unnamedplus
 if has("unix")
 	" ----- on UNIX ask lemonade to translate line-endings
