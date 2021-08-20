@@ -34,7 +34,8 @@ else()
     message(FATAL_ERROR "Currently unsuppored environment \"${MSYSTEM_NAME}\". CMake willl exit now.")
 endif()
 
-find_package(Go 1.16 REQUIRED)
+set(GO_MIN_REQURED_VERSION 1.17)
+find_package(Go ${GO_MIN_REQURED_VERSION} REQUIRED)
 find_package(Git REQUIRED)
 
 # Make sure we setup go properly
@@ -56,7 +57,7 @@ endif()
 # Project version number
 set(PRJ_VERSION_Major "1")
 set(PRJ_VERSION_Minor "3")
-set(PRJ_VERSION_Patch "0")
+set(PRJ_VERSION_Patch "1")
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/.git" AND IS_DIRECTORY "${PROJECT_SOURCE_DIR}/.git")
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/cmake/githash.sh ${GIT_EXECUTABLE}
@@ -208,31 +209,16 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     # Go linter
     ########################################################################################################
 
-    # Running linters on main target
-    find_program(GO_LINTER golangci-lint PATHS ${PROJECT_BINARY_DIR} NO_DEFAULT_PATH)
-    if(NOT GO_LINTER)
-        set(golangci-lint-ver "1.33.0")
-        message(STATUS "Preparing golangci-lint ${golangci-lint-ver}")
-        file(DOWNLOAD "https://github.com/golangci/golangci-lint/releases/download/v${golangci-lint-ver}/golangci-lint-${golangci-lint-ver}-linux-amd64.tar.gz" ${PROJECT_BINARY_DIR}/golangci-lint.tar.gz
-            INACTIVITY_TIMEOUT 60
-            TIMEOUT 300
-            STATUS DOWNLOAD_RES
-            EXPECTED_HASH SHA256=e2d6082f1df53c5d2c280765000f9e82783ea909ba419c6c4e172936b076031e)
-        list(GET DOWNLOAD_RES 0 RES)
-        list(GET DOWNLOAD_RES 1 MSG)
-        if(RES)
-            message(FATAL_ERROR "${MSG} : ${RES}")
-        endif()
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xf golangci-lint.tar.gz WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E copy golangci-lint-${golangci-lint-ver}-linux-amd64/golangci-lint golangci-lint WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory golangci-lint-${golangci-lint-ver}-linux-amd64 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E remove golangci-lint.tar.gz WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-        set(GO_LINTER ${PROJECT_BINARY_DIR}/golangci-lint)
-    endif()
+    add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/staticcheck
+        COMMAND GOPATH=${GO_PATH} GOOS= GOARCH= ${GO_EXECUTABLE} build ${GO_MOD_ARGS} -o ${PROJECT_BINARY_DIR}/staticcheck
+            honnef.co/go/tools/cmd/staticcheck
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+        COMMENT "Building staticcheck executable...")
 
     add_custom_target(lint
-        COMMAND ${GO_ENV} ${GO_LINTER} run
-        COMMENT "Mega-linting project with ${GO_LINTER}..."
+        DEPENDS ${PROJECT_BINARY_DIR}/staticcheck
+        COMMAND ${PROJECT_BINARY_DIR}/staticcheck -f stylish -tests=false ./...
+        COMMENT "Linting project..."
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 
     ########################################################################################################
@@ -241,10 +227,23 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     add_custom_target(deps_tidy
         SOURCES ${PROJECT_SOURCE_DIR}/go.mod
-        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod tidy
+        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod tidy -go=${GO_MIN_REQURED_VERSION}
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
         COMMENT "Cleaning dependencies (go mod tidy)"
         VERBATIM)
+
+    add_custom_target(deps_download
+        SOURCES ${PROJECT_SOURCE_DIR}/go.mod
+        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod download all
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+        COMMENT "Downloading dependencies (go mod download)"
+        VERBATIM)
+
+    add_custom_target(deps_print
+        SOURCES ${PROJECT_SOURCE_DIR}/go.mod
+        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod graph -go=${GO_MIN_REQURED_VERSION}
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Printing dependencies (go mod graph)")
 
     add_custom_target(deps_vendor
         SOURCES ${PROJECT_SOURCE_DIR}/go.mod

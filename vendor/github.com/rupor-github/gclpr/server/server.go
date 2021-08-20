@@ -44,7 +44,7 @@ func (sc *secConn) Read(p []byte) (n int, err error) {
 
 	// check first 6 bytes of magic - signature and major version number
 	if bytes.Compare(magic[0:6], sc.magic[0:6]) != 0 {
-		log.Printf("Bad signature or uncompatible versions: server [%x], client [%x]", sc.magic, magic)
+		log.Printf("Bad signature or incompatible versions: server [%x], client [%x]", sc.magic, magic)
 		return 0, rpc.ErrShutdown
 	}
 
@@ -52,7 +52,7 @@ func (sc *secConn) Read(p []byte) (n int, err error) {
 
 	var ok bool
 	if pk, ok = sc.pkeys[hpk]; !ok {
-		log.Printf("Call with unathorized key: %s", hex.EncodeToString(hpk[:]))
+		log.Printf("Call with unauthorized key: %s", hex.EncodeToString(hpk[:]))
 		return 0, rpc.ErrShutdown
 	}
 
