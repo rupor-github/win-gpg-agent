@@ -1,8 +1,8 @@
-// go:build tools
+//go:build tools
+// +build tools
 
 package tools
 
 import (
-	//  To keep go mod happy
 	_ "honnef.co/go/tools/cmd/staticcheck"
 )
