@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,11 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// +build tools
-
 package atomic
 
-import (
-	// Tools used during development.
-	_ "golang.org/x/lint/golint"
-)
+//go:generate bin/gen-atomicint -name=Int32 -wrapped=int32 -file=int32.go
+//go:generate bin/gen-atomicint -name=Int64 -wrapped=int64 -file=int64.go
+//go:generate bin/gen-atomicint -name=Uint32 -wrapped=uint32 -unsigned -file=uint32.go
+//go:generate bin/gen-atomicint -name=Uint64 -wrapped=uint64 -unsigned -file=uint64.go

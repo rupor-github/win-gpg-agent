@@ -29,6 +29,7 @@ const (
 	MaxAgentMsgLen = 256 * 1024
 
 	GPGAgentName             = "gpg-agent"
+	WinAgentName             = "agent-gui"
 	SocketAgentName          = "S." + GPGAgentName
 	SocketAgentBrowserName   = "S." + GPGAgentName + ".browser"
 	SocketAgentExtraName     = "S." + GPGAgentName + ".extra"
@@ -47,7 +48,7 @@ func FileExists(filename string) bool {
 	if os.IsNotExist(err) {
 		return false
 	}
-	return !info.IsDir()
+	return info.Mode().IsRegular()
 }
 
 // WaitForFileArrival checks for files existence once a second for requested waiting period.
@@ -58,18 +59,21 @@ func WaitForFileArrival(period time.Duration, filenames ...string) bool {
 		return true
 	}
 
+	fns := make([]string, l)
+	copy(fns, filenames)
+
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
 	tCur := time.Now()
 	tEnd := tCur.Add(period)
 	for ; tCur.Before(tEnd); tCur = <-ticker.C {
-		for i, fn := range filenames {
-			if len(fn) == 0 {
+		for i := 0; i < len(fns); i++ {
+			if len(fns[i]) == 0 {
 				continue
 			}
-			if FileExists(fn) {
-				filenames[i] = ""
+			if FileExists(fns[i]) {
+				fns[i] = ""
 				l--
 			}
 		}
@@ -88,24 +92,29 @@ func WaitForFileDeparture(period time.Duration, filenames ...string) {
 		return
 	}
 
+	fns := make([]string, l)
+	copy(fns, filenames)
+
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
 	tCur := time.Now()
 	tEnd := tCur.Add(period)
 	for ; tCur.Before(tEnd) && l > 0; tCur = <-ticker.C {
-		for i, fn := range filenames {
-			if len(fn) == 0 {
+		for i := 0; i < len(fns); i++ {
+			if len(fns[i]) == 0 {
 				continue
 			}
-			if !FileExists(fn) {
-				filenames[i] = ""
+			if !FileExists(fns[i]) {
+				fns[i] = ""
 				l--
 				continue
 			}
-			if err := os.Remove(fn); err == nil {
-				filenames[i] = ""
+			if err := os.Remove(fns[i]); err == nil {
+				fns[i] = ""
 				l--
+			} else {
+				log.Printf("Departing file removal problem: %s", err.Error())
 			}
 		}
 	}

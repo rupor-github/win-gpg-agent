@@ -9,10 +9,10 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pborman/getopt/v2 v2.1.0
 	github.com/rupor-github/gclpr v1.1.2
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.7.0
 	go.uber.org/config v1.4.0
-	go.uber.org/multierr v1.4.0
-	golang.org/x/sys v0.0.0-20210820121016-41cdb8703e55
+	go.uber.org/multierr v1.7.0
+	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c
 	honnef.co/go/tools v0.2.1
 )
 
@@ -23,8 +23,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/stretchr/objx v0.1.0 // indirect
-	go.uber.org/atomic v1.5.0 // indirect
-	go.uber.org/tools v0.0.0-20190618225709-2cfd321de3ee // indirect
+	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de // indirect
 	golang.org/x/mod v0.3.0 // indirect
@@ -32,4 +31,5 @@ require (
 	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/yaml.v2 v2.2.5 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

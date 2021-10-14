@@ -93,7 +93,7 @@ func (c *Connector) Close() {
 			log.Printf("Error closing listener on connector for %s: %s", c.index, err)
 		}
 	}
-	if c.index != ConnectorPipeSSH && len(c.PathGUI()) != 0 {
+	if c.index != ConnectorPipeSSH && c.index != ConnectorExtraPort && len(c.PathGUI()) != 0 {
 		if err := os.Remove(c.PathGUI()); err != nil {
 			log.Printf("Error closing connector for %s: %s", c.index, err.Error())
 		}

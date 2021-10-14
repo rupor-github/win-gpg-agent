@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -14,16 +15,18 @@ import (
 
 // GPGConfig structs wraps configuration values for GnuPG.
 type GPGConfig struct {
-	Path   string   `yaml:"install_path,omitempty"`
-	Home   string   `yaml:"homedir,omitempty"`
-	Config string   `yaml:"gpg_agent_conf,omitempty"`
-	Args   []string `yaml:"gpg_agent_args,omitempty"`
+	Path    string   `yaml:"install_path,omitempty"`
+	Home    string   `yaml:"homedir,omitempty"`
+	Sockets string   `yaml:"socketdir,omitempty"`
+	Config  string   `yaml:"gpg_agent_conf,omitempty"`
+	Args    []string `yaml:"gpg_agent_args,omitempty"`
 }
 
 var defaultGPGConfig = `
 gpg:
   install_path: "${ProgramFiles(x86)}\\gnupg"
   homedir: "${APPDATA}\\gnupg"
+  socketdir: "${LOCALAPPDATA}\\gnupg"
 `
 
 // CLPConfig wraps configuration values for gclpr.
@@ -55,7 +58,7 @@ gui:
   ignore_session_lock: false
   deadline: 1m
   pipe_name: %s
-  homedir: "${LOCALAPPDATA}\\gnupg"
+  homedir: "${LOCALAPPDATA}\\gnupg\\%s"
   gclpr:
     port: 2850
   pin_dialog:
@@ -75,7 +78,7 @@ func Load(fnames ...string) (*Config, error) {
 
 	configSources := []ucfg.YAMLOption{
 		ucfg.Expand(os.LookupEnv),
-		ucfg.Source(strings.NewReader(fmt.Sprintf(defaultGUIConfig, util.SSHAgentPipeName))),
+		ucfg.Source(strings.NewReader(fmt.Sprintf(defaultGUIConfig, util.SSHAgentPipeName, util.WinAgentName))),
 		ucfg.Source(strings.NewReader(defaultGPGConfig)),
 	}
 	for _, fname := range fnames {
@@ -95,5 +98,10 @@ func Load(fnames ...string) (*Config, error) {
 	if err := provider.Get("gpg").Populate(&cfg.GPG); err != nil {
 		return nil, err
 	}
+
+	if filepath.Clean(cfg.GPG.Sockets) == filepath.Clean(cfg.GUI.Home) {
+		return nil, fmt.Errorf("potential conflict as gpg.socketdir=[%s] and gui.homedir=[%s] are pointing to the same location", filepath.Clean(cfg.GPG.Sockets), filepath.Clean(cfg.GUI.Home))
+	}
+
 	return &cfg, nil
 }

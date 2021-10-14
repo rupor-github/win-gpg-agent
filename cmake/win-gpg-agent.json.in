@@ -26,6 +26,7 @@
         "  $content += \"  #   homedir: \"\"`$`{USERPROFILE`}\\\\scoop\\\\apps\\\\gnupg\\\\current\\\\home\"\"`r`n\"",
         "  $content += \"  # After gnupg 2.3.2 release (due to the changes in T5537) use this one instead`r`n\"",
         "  $content += \"  homedir: \"\"`$`{USERPROFILE`}\\\\scoop\\\\persist\\\\gnupg\\\\home\"\"`r`n\"",
+        "  $content += \"  socketdir: \"\"\"\"`r`n\"",
         "  $content += \"gui:`r`n\"",
         "  $content += \"  debug: false`r`n\"",
         "  $content += \"  setenv: true`r`n\"",

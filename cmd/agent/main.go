@@ -37,9 +37,10 @@ var (
 )
 
 const (
-	envGPGHomeName = "GNUPG_HOME"
-	envGUIHomeName = "AGENT_HOME"
-	envPipeName    = "SSH_AUTH_SOCK"
+	envGPGHomeName    = "GNUPG_HOME"
+	envGPGSocketsName = "GNUPG_SOCKETS"
+	envGUIHomeName    = "AGENT_HOME"
+	envPipeName       = "SSH_AUTH_SOCK"
 )
 
 func onReady() {
@@ -104,6 +105,8 @@ func setVars(native bool) (func(), error) {
 		{name: envPipeName, value: gpgAgent.Cfg.GUI.PipeName, register: false, translate: false},
 		{name: "WSL_" + envGPGHomeName, value: gpgAgent.Cfg.GPG.Home, register: true, translate: true},
 		{name: "WIN_" + envGPGHomeName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GPG.Home), register: true, translate: false},
+		{name: "WSL_" + envGPGSocketsName, value: gpgAgent.Cfg.GPG.Sockets, register: true, translate: true},
+		{name: "WIN_" + envGPGSocketsName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GPG.Sockets), register: true, translate: false},
 		{name: "WSL_" + envGUIHomeName, value: gpgAgent.Cfg.GUI.Home, register: true, translate: true},
 		{name: "WIN_" + envGUIHomeName, value: util.PrepareWindowsPath(gpgAgent.Cfg.GUI.Home), register: true, translate: false},
 	}
@@ -126,6 +129,9 @@ func setVars(native bool) (func(), error) {
 
 	// register everything
 	for i := 0; i < len(vars); i++ {
+		if len(vars[i].value) == 0 {
+			continue
+		}
 		if err := util.PrepareUserEnvironmentVariable(vars[i].name, vars[i].value, vars[i].register, vars[i].translate); err != nil {
 			cleaner()
 			return nil, fmt.Errorf("unable to add %s to user environment: %w", vars[i].name, err)
@@ -300,6 +306,8 @@ func main() {
 
 	// serve gclpr if requested
 	clipServe(cfg)
+
+	log.Printf("%v+", *cfg)
 
 	// We want to fully control gpg-agent, so if it is running - either we left it from previous run or it is not ours
 	// Both cases should never happen so try to kill it just in case...

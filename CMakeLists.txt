@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 
 message(STATUS "Running cmake version ${CMAKE_VERSION}")
 if (NOT CMAKE_TOOLCHAIN_FILE)
@@ -56,8 +56,8 @@ endif()
 
 # Project version number
 set(PRJ_VERSION_Major "1")
-set(PRJ_VERSION_Minor "3")
-set(PRJ_VERSION_Patch "2")
+set(PRJ_VERSION_Minor "4")
+set(PRJ_VERSION_Patch "0")
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/.git" AND IS_DIRECTORY "${PROJECT_SOURCE_DIR}/.git")
     execute_process(COMMAND ${CMAKE_SOURCE_DIR}/cmake/githash.sh ${GIT_EXECUTABLE}
@@ -129,13 +129,9 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/win-gpg-agent.zip
     COMMENT "Archiving release..."
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
 
-# shortcut
 add_custom_target(bin_agent ALL
-    DEPENDS ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
-    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
     DEPENDS ${PROJECT_SOURCE_DIR}/cmd/agent/resources.syso
+    BYPRODUCTS ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
     COMMAND ${GO_ENV} ${GO_EXECUTABLE} build -trimpath -o ${PROJECT_BINARY_DIR}/agent-gui${CMAKE_EXECUTABLE_SUFFIX}
         -ldflags='-H=windowsgui'
         ${GO_ARGS}

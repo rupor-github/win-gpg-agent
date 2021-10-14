@@ -58,15 +58,20 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 		locked = &a.locked
 	}
 
-	a.conns[ConnectorSockAgent] = NewConnector(ConnectorSockAgent, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentName, locked, &a.wg)
-	a.conns[ConnectorSockAgentExtra] = NewConnector(ConnectorSockAgentExtra, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentExtraName, locked, &a.wg)
-	a.conns[ConnectorSockAgentBrowser] = NewConnector(ConnectorSockAgentBrowser, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentBrowserName, locked, &a.wg)
-	a.conns[ConnectorSockAgentSSH] = NewConnector(ConnectorSockAgentSSH, a.Cfg.GPG.Home, a.Cfg.GUI.Home, util.SocketAgentSSHName, locked, &a.wg)
+	sdir := a.Cfg.GPG.Home
+	if len(a.Cfg.GPG.Sockets) != 0 {
+		sdir = a.Cfg.GPG.Sockets
+	}
+
+	a.conns[ConnectorSockAgent] = NewConnector(ConnectorSockAgent, sdir, a.Cfg.GUI.Home, util.SocketAgentName, locked, &a.wg)
+	a.conns[ConnectorSockAgentExtra] = NewConnector(ConnectorSockAgentExtra, sdir, a.Cfg.GUI.Home, util.SocketAgentExtraName, locked, &a.wg)
+	a.conns[ConnectorSockAgentBrowser] = NewConnector(ConnectorSockAgentBrowser, sdir, a.Cfg.GUI.Home, util.SocketAgentBrowserName, locked, &a.wg)
+	a.conns[ConnectorSockAgentSSH] = NewConnector(ConnectorSockAgentSSH, sdir, a.Cfg.GUI.Home, util.SocketAgentSSHName, locked, &a.wg)
 	a.conns[ConnectorPipeSSH] = NewConnector(ConnectorPipeSSH, "", "", a.Cfg.GUI.PipeName, locked, &a.wg)
 	a.conns[ConnectorSockAgentCygwinSSH] = NewConnector(ConnectorSockAgentCygwinSSH, "", a.Cfg.GUI.Home, util.SocketAgentSSHCygwinName, locked, &a.wg)
 	if a.Cfg.GUI.ExtraPort != 0 {
 		// Since OpenSSH-Win32 does not yet know how to redirect unix sockets we have no choice but to make available this additional port on local host only
-		a.conns[ConnectorExtraPort] = NewConnector(ConnectorExtraPort, a.Cfg.GPG.Home, fmt.Sprintf("localhost:%d", a.Cfg.GUI.ExtraPort), util.SocketAgentExtraName, locked, &a.wg)
+		a.conns[ConnectorExtraPort] = NewConnector(ConnectorExtraPort, sdir, fmt.Sprintf("localhost:%d", a.Cfg.GUI.ExtraPort), util.SocketAgentExtraName, locked, &a.wg)
 	}
 
 	util.WaitForFileDeparture(time.Second*5,
@@ -86,7 +91,10 @@ func (a *Agent) Status() string {
 
 	fmt.Fprintf(&buf, "\n\n---------------------------\nGnuPG version:\n---------------------------\n%s", a.Ver)
 	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent command line:\n---------------------------\n%s", a.cmd.String())
-	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent Assuan sockets directory:\n---------------------------\n%s", a.Cfg.GPG.Home)
+	fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent home directory:\n---------------------------\n%s", a.Cfg.GPG.Home)
+	if len(a.Cfg.GPG.Sockets) != 0 {
+		fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent sockets directory:\n---------------------------\n%s", a.Cfg.GPG.Sockets)
+	}
 	if a.Cfg.GUI.ExtraPort != 0 {
 		fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent Assuan extra socket on TCP:\n---------------------------\nlocalhost:%d", a.Cfg.GUI.ExtraPort)
 	}

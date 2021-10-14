@@ -27,6 +27,9 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 
 **COMPATIBILITY NOTICE:** tools from this project were tested on Windows 10 2004 with multiple distributions and should work on anything starting with 1809 - beginning with insider build 17063 and would not work on older versions of Windows 10, because it requires [AF_UNIX socket support](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/) feature. I tested everything with "official" GnuPG LTS Windows build 2.2.27.
 
+**BREAKING CHANGES:**
+* v1.4.0 changes default configuration values to support installation of 2.3+ GnuPG in non-portable mode. Most noticable this requred changing default `gui.homedir` and introducing `gpg.socketdir` to avoid `gpg-agent` sockets being overwritten by `agent-gui` due to name conflict. This change may require adjusting your configuration and usage scripts.
+
 ## Installation
 
 Starting with v1.2.3 win-gpg-agent can be installed and updated using [scoop](https://scoop.sh/). Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://github.com/gpailler) for help and inspiration.
@@ -96,7 +99,7 @@ Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime ma
 - create and service Cygwin socket for Cygwin/MSYS2 build of OpenSSH. Note, that OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
 - create and service tcp socket on "localhost:extra_port" for Win32-OpenSSH redirection (it does not presently supports unix socket redirection). This requres configuration and is disabled out of the box.
 - set environment variable `SSH_AUTH_SOCK` on Windows side to point either to pipe name so native OpenSSH tools know where to go or to Cygwin socket file to be used with Cygwin/MSYS2 ssh binaries.
-- create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME`, `WIN_AGENT_HOME`, `WSL_AGENT_HOME` environment variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation. Basically WSL_* would be paths on the Linux side and WIN_* are Windows ones. This way every WSL environment started after will have proper "unix" and "windows" paths available for easy scripting.
+- create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME`, `WIN_GNUPG_SOCKETS`, `WSL_GNUPG_SOCKETS`, `WIN_AGENT_HOME`, `WSL_AGENT_HOME` environment variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation. Basically WSL_* would be paths on the Linux side and WIN_* are Windows ones. This way every WSL environment started after will have proper "unix" and "windows" paths available for easy scripting.
 - serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool (NOTE: starting with v1.1.0 gclpr server backend enforces protocol versioning and may require upgrade of gclpr).
 
 You could always see what is going on by clicking "Status" on applet's menu:
@@ -109,6 +112,7 @@ Reasonable defaults are provided (but could be changed by using configuration fi
 gpg:
   install_path: "${ProgramFiles(x86)}\\gnupg"
   homedir: "${APPDATA}\\gnupg"
+  socketdir: "${LOCALAPPDATA}\\gnupg"
 gui:
   debug: false
   setenv: true
@@ -116,7 +120,7 @@ gui:
   ignore_session_lock: false
   deadline: 1m
   pipe_name: "\\\\.\\pipe\\openssh-ssh-agent"
-  homedir: "${LOCALAPPDATA}\\gnupg"
+  homedir: "${LOCALAPPDATA}\\gnupg\\agent-gui"
   gclpr:
     port: 2850
 ```
@@ -125,16 +129,17 @@ Full list of configuration keys:
 
 * `gpg.install_path` - installation directory of GnuPG suite
 * `gpg.homedir` - will be supplied to gpg-agent on start as --homedir
+* `gpg.socketdir` - gnupg 2.3+ [(T5537)](https://dev.gnupg.org/T5537) being installed in non-portable mode creates sockets in directory, different from homedir. To be exact default home directory continues to be `${APPDATA}\gnupg`, but sockets are now created in `${LOCALAPPDATA}\gnupg`. Changing `gpg.homedir` to `${LOCALAPPDATA}\gnupg` does not help - gnupg will use subdirectory of `${LOCALAPPDATA}\gnupg` deriving name of sha1 hash with "d." prepended to it. This configuration allows to compensate this - if set it will be used by win-gpg-agent to locate sockets created by gpg-agent proper while keeping home directory unchanged. Make sure that `gpg.socketdir` and `gui.homedir` are not pointing to the same location or socket names for gpg-agent and agent-gui will overlap causing havoc. If explicitly set to empty string `gpg.homedir` value will be used instead
 * `gpg.gpg_agent_conf` - if defined will be supplied to gpg-agent on start
-* `gpg.gpg_agent_args` - array of additional arguments to be passed to gpg-agent on start. No checking is performed.
+* `gpg.gpg_agent_args` - array of additional arguments to be passed to gpg-agent on start. No checking is performed
 * `gui.debug` - turn on debug logging. Uses `OutputDebugStringW` - use Sysinternals [debugview](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see
 * `gui.setenv` - automatically prepare environment variables
 * `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used by default instead of what comes with Windows 10.
-* `gui.extra_port` - Win32-OpenSSH does not know how to redirect unix sockets yet, so if you want to use windows native ssh to remote "S.gpg-agent.extra" specify some non-zero port here. Program will open this port on localhost and you can use socat on the other side to recreate domain socket. By default it is disabled.
+* `gui.extra_port` - Win32-OpenSSH does not know how to redirect unix sockets yet, so if you want to use windows native ssh to remote "S.gpg-agent.extra" specify some non-zero port here. Program will open this port on localhost and you can use socat on the other side to recreate domain socket. By default it is disabled
 * `gui.ignore_session_lock` - continue to serve requests even if user session is locked
 * `gui.pipe_name` - full name of pipe for Windows OpenSSH
 * `gui.homedir` - directory to be used by agent-gui to create sockets in
-* `gui.deadline` - since code which does translation from Assuan socket to AF_UNIX socket has no understanding of underlying protocol it could leave servicing go-routine handing forever (ex: client process died). This value specifies inactivity deadline after which connection will be collected. 
+* `gui.deadline` - since code which does translation from Assuan socket to AF_UNIX socket has no understanding of underlying protocol it could leave servicing go-routine handing forever (ex: client process died). This value specifies inactivity deadline after which connection will be collected 
 * `gui.gclpr.port` - server port for [gclpr](https://github.com/rupor-github/gclpr) backend
 * `gui.gclpr.line_endings` - line ending translation for [gclpr](https://github.com/rupor-github/gclpr) backend
 * `gui.gclpr.public_keys` - array of known public keys for [gclpr](https://github.com/rupor-github/gclpr) backend
