@@ -28,7 +28,7 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 **COMPATIBILITY NOTICE:** tools from this project were tested on Windows 10 2004 with multiple distributions and should work on anything starting with 1809 - beginning with insider build 17063 and would not work on older versions of Windows 10, because it requires [AF_UNIX socket support](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/) feature. I tested everything with "official" GnuPG LTS Windows build 2.2.27.
 
 **BREAKING CHANGES:**
-* v1.4.0 changes default configuration values to support installation of 2.3+ GnuPG in non-portable mode. Most noticable this requred changing default `gui.homedir` and introducing `gpg.socketdir` to avoid `gpg-agent` sockets being overwritten by `agent-gui` due to name conflict. This change may require adjusting your configuration and usage scripts.
+* v1.4.0 changes default configuration values to support installation of 2.3+ GnuPG in non-portable mode. This requred changing default `gui.homedir` and introducing `gpg.socketdir` to avoid `gpg-agent` sockets being overwritten by `agent-gui` due to name conflict. This change may require adjusting your configuration and usage scripts.
 
 ## Installation
 
