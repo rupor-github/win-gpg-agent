@@ -163,8 +163,10 @@ func (a *Agent) Start() error {
 		"--use-standard-socket",  // in case we are dealing with older versions
 		"--enable-ssh-support",   // presently useless under Windows
 		"--enable-putty-support", // so we have to use this instead, but it does not work in 64 bits builds under Windows...
-		"--pinentry-program", filepath.Join(filepath.Dir(expath), "pinentry.exe"),
 		"--daemon",
+	}
+	if !a.Cfg.GPG.StdPin {
+		args = append(args, "--pinentry-program", filepath.Join(filepath.Dir(expath), "pinentry.exe"))
 	}
 	if len(a.Cfg.GPG.Config) > 0 && util.FileExists(a.Cfg.GPG.Config) {
 		args = append(args, "--options", a.Cfg.GPG.Config)
