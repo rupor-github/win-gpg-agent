@@ -123,6 +123,7 @@ gui:
   homedir: "${LOCALAPPDATA}\\gnupg\\agent-gui"
   gclpr:
     port: 2850
+  pinentry: ".\\pinentry.exe"
 ```
 
 Full list of configuration keys:
@@ -143,6 +144,7 @@ Full list of configuration keys:
 * `gui.gclpr.port` - server port for [gclpr](https://github.com/rupor-github/gclpr) backend
 * `gui.gclpr.line_endings` - line ending translation for [gclpr](https://github.com/rupor-github/gclpr) backend
 * `gui.gclpr.public_keys` - array of known public keys for [gclpr](https://github.com/rupor-github/gclpr) backend
+* `gui.pinentry` - path to [pinentry](https://gnupg.org/related_software/pinentry/index.html) program
 
 ### pinentry.exe
 

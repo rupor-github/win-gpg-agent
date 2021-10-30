@@ -48,6 +48,7 @@ type GUIConfig struct {
 	Deadline          time.Duration   `yaml:"deadline,omitempty"`
 	PinDlg            util.DlgDetails `yaml:"pin_dialog,omitempty"`
 	Clp               CLPConfig       `yaml:"gclpr,omitempty"`
+	Pinentry          string          `yaml:"pinentry,omitempty"`
 }
 
 var defaultGUIConfig = `
@@ -65,6 +66,7 @@ gui:
     delay: 300ms
     name: Windows Security
     class: Credential Dialog Xaml Host
+  pinentry: ".\\pinentry.exe"
 `
 
 // Config keeps all configuration values.

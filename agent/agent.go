@@ -157,13 +157,18 @@ func (a *Agent) Start() error {
 		return err
 	}
 
+	pinentryProgram := a.Cfg.GUI.Pinentry
+	if strings.HasPrefix(pinentryProgram, ".\\") {
+		pinentryProgram = filepath.Join(filepath.Dir(expath), strings.TrimPrefix(pinentryProgram, ".\\"))
+	}
+
 	args := []string{
 		"--homedir", a.Cfg.GPG.Home,
 		"--ssh-fingerprint-digest", "SHA256",
 		"--use-standard-socket",  // in case we are dealing with older versions
 		"--enable-ssh-support",   // presently useless under Windows
 		"--enable-putty-support", // so we have to use this instead, but it does not work in 64 bits builds under Windows...
-		"--pinentry-program", filepath.Join(filepath.Dir(expath), "pinentry.exe"),
+		"--pinentry-program", pinentryProgram,
 		"--daemon",
 	}
 	if len(a.Cfg.GPG.Config) > 0 && util.FileExists(a.Cfg.GPG.Config) {
