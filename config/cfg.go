@@ -18,6 +18,7 @@ type GPGConfig struct {
 	Path    string   `yaml:"install_path,omitempty"`
 	Home    string   `yaml:"homedir,omitempty"`
 	Sockets string   `yaml:"socketdir,omitempty"`
+	StdPin  bool     `yaml:"use_standard_pinentry,omitempty"`
 	Config  string   `yaml:"gpg_agent_conf,omitempty"`
 	Args    []string `yaml:"gpg_agent_args,omitempty"`
 }
