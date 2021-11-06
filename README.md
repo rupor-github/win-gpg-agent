@@ -32,22 +32,23 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 
 ## Installation
 
-Starting with v1.2.3 win-gpg-agent can be installed and updated using [scoop](https://scoop.sh/). Thank you [LostLaplace](https://github.com/LostLaplace) and [gpailler](https://github.com/gpailler) for help and inspiration.
-
 ### Installing using Scoop
 
 ```powershell
     scoop install https://github.com/rupor-github/win-gpg-agent/releases/latest/download/win-gpg-agent.json
 ```
-and updating:
+#### updating
 
 ```powershell
     scoop update win-gpg-agent
 ``` 
 
-### Installing using PowerShell
+### Installing manually
 
-```pwsh
+Download archive from the [releases page](https://github.com/rupor-github/win-gpg-agent/releases) and unpack it in a convenient location. For example:
+#### using PowerShell
+
+```powershell
 	Push-Location -Path $env:USERPROFILE  # Or, wherever you want the win-gpg-agent directory located 
 	$uriLatestWinGpgAgentZip = Invoke-RestMethod -Uri "https://api.github.com/repos/rupor-github/win-gpg-agent/releases/latest"  | Select-Object -Property assets -ExpandProperty assets |  Where-Object -FilterScript {$_.name -eq "win-gpg-agent.zip" } | Select-Object -Property browser_download_url -ExpandProperty browser_download_url 
 	Invoke-WebRequest  -OutFile "win-gpg-agent.zip" -Uri $uriLatestWinGpgAgentZip
@@ -56,9 +57,10 @@ and updating:
 	Pop-Location
 ```
 
-Alternatively, download archive from the [releases page](https://github.com/rupor-github/win-gpg-agent/releases) and unpack it in a convenient location.
 
-Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: ![key](docs/build_key.png) RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
+**NOTE** Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
+
+![key](docs/build_key.png)
 
 ## Usage
 
