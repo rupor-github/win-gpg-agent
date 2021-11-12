@@ -45,9 +45,14 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to run \"%s\": %w", fname, err)
 	}
-	words := strings.Split(strings.Split(string(out), "\n")[0], " ")
-	if len(words) == 3 {
-		a.Ver = words[2]
+	lines := strings.Split(string(out), "\n")
+	if len(lines) > 0 {
+		words := strings.Split(lines[0], " ")
+		if len(words) >= 3 {
+			a.Ver = words[2]
+		} else {
+			a.Ver = lines[0]
+		}
 	}
 	a.Exe = fname
 
