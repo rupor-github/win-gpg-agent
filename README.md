@@ -233,6 +233,24 @@ gui:
   debug: false
 ```
 
+## Troubleshooting
+
+In most cases all what's required is a simple `agent-gui.conf` adgustment, however sometimes with non typical installations you may need to dig diper and try to understand what is going on both in agent-gui and in underlying gpg-agent. Here are couple of pointers:
+
+* In many cases to see what is going on you just have to look at ssh debug trace, something like `ssh -vvv host`.
+* All agent-gui components have debug switch to activate additional logging. Internally logging is using `Win32 OutputDebugString` API call - so you would need to use debugger or tool like [Sysinternals DebugView](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see and capture it.
+* When this is not enough you may want to turn on debug logging in GnuPG tools, it is pretty well documented but just in case: I have scoop based `portable` GmuPG installation (gpgconf.ctl is present in bin subdirectory of installation). In order to see full trace of gpg-agent I create `${APPDATA}\gnupg\gpg-agent.conf` with following content:
+```
+debug-all
+debug-level guru
+log-file "local path to the log file location"
+verbose
+verbose
+verbose
+```
+
+Before creating issues and asking for help, please, see if you could diagnose what is going on - you'd need to do this anyways and this will save everybody a lot of time. Remember - `win-gpg-agent` tools are making GnuPG integration with various variants of WIndows environments easier, but they would not provide any functionality GnuPG tools do not provide. So always make sure that what you want is actually supported by original GnuPG set.
+
 ## Example
 
 Putting it all together nicely - `remote` here refers to your wsl shell or some other box or virtual machine you could `ssh` to. Goal here is to have a setup which could be used the same way in different Linux instance with minimal changes and customization - be it native Linux install, something I ssh into or WSL distro running. We should be able to use a small set of safely stored private keys and be able to forward both gpg and ssh everywhere with minimal complexity (at least it should be manageable).
