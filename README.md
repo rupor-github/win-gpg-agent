@@ -1,7 +1,7 @@
 <p align="center">
     <h1 align="center">win-gpg-agent</h1>
     <p align="center">
-		Simple set of tools to make working with GPG and SSH keys easier on Windows 10.
+		Simple set of tools to make working with GPG and SSH keys easier on Windows 10/11.
     </p>
     <p align="center">
         <a href="https://pkg.go.dev/mod/github.com/rupor-github/win-gpg-agent/?tab=packages"><img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-blue.svg" /></a>
@@ -10,9 +10,9 @@
     <hr>
 </p>
 
-Windows 10 has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https:/github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects - [this is](https://github.com/lfit/itpol/blob/master/protecting-code-integrity.md) an excellent explanation of code integrity aspect). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux practically out of the box.
+Recent Windows has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https:/github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects - [this is](https://github.com/lfit/itpol/blob/master/protecting-code-integrity.md) an excellent explanation of code integrity aspect). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux practically out of the box.
 
-Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows 10 (console, terminal and all), Cygwin/MSYS2 ssh tools and WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
+Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows (console, terminal and all), Cygwin/MSYS2 ssh tools and WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
 
 **DISCLAIMER** When using term `GnuPG` I am **not referring** to [GPG4Win](https://gpg4win.org), but rather to basic GnuPG tools built from code base common for all platforms. GPG4Win includes this set (which could be extracted), but normally it is available from GnuPG ftp site [ftp.gnupg.org](https://www.gnupg.org/ftp/gcrypt/binary/). It could be easily installed by using [scoop](https://scoop.sh/) command `scoop install gnupg`, [chocolatey](https://chocolatey.org/) command `choco install gnupg` or [winget](https://devblogs.microsoft.com/commandline/windows-package-manager-1-0/) command `winget install GnuPG`. So no wonderful KDE GUIs ported to Windows.
 
@@ -150,7 +150,7 @@ Full list of configuration keys:
 * `gpg.gpg_agent_args` - array of additional arguments to be passed to gpg-agent on start. No checking is performed
 * `gui.debug` - turn on debug logging. Uses `OutputDebugStringW` - use Sysinternals [debugview](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see
 * `gui.setenv` - automatically prepare environment variables
-* `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used by default instead of what comes with Windows 10.
+* `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used by default instead of what comes with Windows.
 * `gui.extra_port` - Win32-OpenSSH does not know how to redirect unix sockets yet, so if you want to use windows native ssh to remote "S.gpg-agent.extra" specify some non-zero port here. Program will open this port on localhost and you can use socat on the other side to recreate domain socket. By default it is disabled
 * `gui.ignore_session_lock` - continue to serve requests even if user session is locked
 * `gui.pipe_name` - full name of pipe for Windows OpenSSH
