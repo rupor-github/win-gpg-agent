@@ -217,7 +217,7 @@ This is helper program along the lines of John Starks' [npiperelay.exe](https://
 
 As an example (with proper path) following will translate Windows side Assuan socket:
 ```bash
-( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a c:/Users/mike0/AppData/Roaming/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
+( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a c:/Users/mike0/AppData/Local/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
 ```
 
 And this (with proper path) will translate Windows side AF_UNIX socket:
@@ -259,7 +259,7 @@ For my WSL installations I always create `~/winhome` and link it to my Windows h
 
 I auto-start `agent-gui.exe` on logon on my Windows box - no special customization is needed (except for `gclpr` public keys from various locations I would like to share my clipboard with)
 
-I am using scoop for `GnuPG` and `win-gpg-agent` installations which results in `portable` GnuPG mode. In this mode `gpg.socketdir` is not required and is set to empty string in my config file. If your configuration is different you may need to use `WSL_GNUPG_SOCKETS`/`WIN_GNUPG_SOCKES` from your environment to properly setup socket paths, so pay attention, code below is an example and may need modification.
+I am using scoop for `GnuPG` and `win-gpg-agent` installations which results in `portable` GnuPG mode. With gnupg 2.3.3 release `gpg.socketdir` is not required and must be set to empty string in config file. With gnupg 2.3.4 configuration must be changed yet again. Look for up to date comments in scoop installation manifest `win-gpg-agent.json` or `agent-gui.conf` after installation. In your scripts you may need to use `WIN_GNUPG_HOME`/`WIN_GNUPG_SOCKES` from your environment to properly setup socket paths as they change from version to version, so pay attention, code below is an example and may need modification. 
 
 In my .bashrc I detect what I have and where it runs using code like this:
 
