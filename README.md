@@ -259,7 +259,7 @@ For my WSL installations I always create `~/winhome` and link it to my Windows h
 
 I auto-start `agent-gui.exe` on logon on my Windows box - no special customization is needed (except for `gclpr` public keys from various locations I would like to share my clipboard with)
 
-I am using scoop for `GnuPG` and `win-gpg-agent` installations which results in `portable` GnuPG mode. With gnupg 2.3.3 release `gpg.socketdir` is not required and must be set to empty string in config file. With gnupg 2.3.4 configuration must be changed yet again. Look for up to date comments in scoop installation manifest `win-gpg-agent.json` or `agent-gui.conf` after installation. In your scripts you may need to use `WIN_GNUPG_HOME`/`WIN_GNUPG_SOCKES` from your environment to properly setup socket paths as they change from version to version, so pay attention, code below is an example and may need modification. 
+I am using scoop for `GnuPG` and `win-gpg-agent` installations which results in `portable` GnuPG mode. With gnupg 2.3.3 release `gpg.socketdir` is not required and must be set to empty string in config file. With gnupg 2.3.4 configuration must be changed yet again. Look for up to date comments in scoop installation manifest `win-gpg-agent.json` or `agent-gui.conf` after installation. In your scripts you may need to use `WIN_GNUPG_HOME` or `WIN_GNUPG_SOCKETS` environment variables to properly setup socket paths as they change from version to version. Please pay attention, code below is an example and may need modification.
 
 In my .bashrc I detect what I have and where it runs using code like this:
 
