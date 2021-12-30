@@ -243,11 +243,11 @@ In most cases all what's required is a simple `agent-gui.conf` adgustment, howev
 
 * In many cases to see what is going on you just have to look at ssh debug trace, something like `ssh -vvv host`.
 * All agent-gui components have debug switch to activate additional logging. Internally logging is using `Win32 OutputDebugString` API call - so you would need to use debugger or tool like [Sysinternals DebugView](https://docs.microsoft.com/en-us/sysinternals/downloads/debugview) to see and capture it.
-* When this is not enough you may want to turn on debug logging in GnuPG tools, it is pretty well documented but just in case: I have scoop based `portable` GmuPG installation (gpgconf.ctl is present in bin subdirectory of installation). In order to see full trace of gpg-agent I create `${APPDATA}\gnupg\gpg-agent.conf` with following content:
+* When this is not enough you may want to turn on debug logging in GnuPG tools, it is pretty well documented but just in case: I have scoop based `portable` GmuPG installation (gpgconf.ctl is present in bin subdirectory of installation). In order to see full trace of gpg-agent I create `${APPDATA}\gnupg\gpg-agent.conf` (exact location depends on your installation) with following content:
 ```
 debug-all
 debug-level guru
-log-file "local path to the log file location"
+log-file "local/path/to/the/log/file"
 verbose
 verbose
 verbose
