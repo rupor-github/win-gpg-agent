@@ -80,7 +80,11 @@ Download archive from the [releases page](https://github.com/rupor-github/win-gp
 ```bash
     export SSH_AUTH_SOCK=$(cygpath ${WSL_AGENT_HOME})/S.gpg-agent.ssh.cyg
 ```
-**NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on on either side per environment. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__. 
+Or you may consider switching it to `win32-openssh` (installed as a Windows feature or more recent version via scoop) by setting GIT_SSH environment variable on Windows side:
+```powershell
+    $Env:GIT_SSH="$(scoop prefix win32-openssh)/ssh.exe"
+```
+**NOTE** that in any case you need to manage `SSH_AUTH_SOCK` environment variable value on on either side per environment. It has to point to named pipe for Windows OpenSSH to work and to Cygwin socket file for Cygwin/MSYS2 tools and __both sets are using the same variable name__.
 
 4. Run `agent-gui.exe`
 
