@@ -401,7 +401,7 @@ main() {
 
     set -- "${POSITIONAL[@]}" # restore positional params
 
-	if [[ -z "$VERBOSE" ]]; then
+    if [[ -z "$VERBOSE" ]]; then
         QUIET="QUIET"
     fi
 
