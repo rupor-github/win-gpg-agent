@@ -36,6 +36,7 @@ const (
 	ConnectorPipeSSH
 	ConnectorSockAgentCygwinSSH
 	ConnectorExtraPort
+	ConnectorXShell
 	maxConnector
 )
 
@@ -55,6 +56,8 @@ func (ct ConnectorType) String() string {
 		return "ssh-agent cygwin socket"
 	case ConnectorExtraPort:
 		return "gpg-agent extra socket on local port"
+	case ConnectorXShell:
+		return "xagent protocol socket"
 	default:
 	}
 	return fmt.Sprintf("unknown connector type %d", ct)
@@ -69,6 +72,7 @@ type Connector struct {
 	locked   *int32
 	wg       *sync.WaitGroup
 	listener net.Listener
+	xa       io.Closer
 }
 
 // NewConnector initializes Connector of particular ConnectorType.
@@ -93,7 +97,13 @@ func (c *Connector) Close() {
 			log.Printf("Error closing listener on connector for %s: %s", c.index, err)
 		}
 	}
-	if c.index != ConnectorPipeSSH && c.index != ConnectorExtraPort && len(c.PathGUI()) != 0 {
+
+	if c.index == ConnectorXShell && c.xa != nil {
+		if err := c.xa.Close(); err != nil {
+			log.Printf("Error closing connector for %s: %s", c.index, err)
+		}
+	}
+	if c.index != ConnectorPipeSSH && c.index != ConnectorExtraPort && c.index != ConnectorXShell && len(c.PathGUI()) != 0 {
 		if err := os.Remove(c.PathGUI()); err != nil {
 			log.Printf("Error closing connector for %s: %s", c.index, err.Error())
 		}
@@ -115,6 +125,16 @@ func (c *Connector) Name() string {
 	return c.name
 }
 
+// Port returns TCP local port of our listener or negative value.
+func (c *Connector) Port() int {
+	if c.listener != nil {
+		if a, ok := c.listener.Addr().(*net.TCPAddr); ok {
+			return a.Port
+		}
+	}
+	return -1
+}
+
 // Serve serves requests on Connector.
 func (c *Connector) Serve(deadline time.Duration) error {
 	switch c.index {
@@ -130,6 +150,8 @@ func (c *Connector) Serve(deadline time.Duration) error {
 		return c.serveSSHCygwinSocket()
 	case ConnectorExtraPort:
 		return c.serveExtraPortSocket(deadline)
+	case ConnectorXShell:
+		return c.serveXAgentSocket()
 	default:
 	}
 	log.Printf("Connector for %s is not supported", c.index)
@@ -390,7 +412,7 @@ func (c *Connector) serveSSHCygwinSocket() error {
 	}
 
 	go func() {
-		log.Printf("Serving %s on %s:%d with nonce: %s)", c.index, socketName, port, util.CygwinNonceString(nonce))
+		log.Printf("Serving %s on %s:%d with nonce: %s", c.index, socketName, port, util.CygwinNonceString(nonce))
 		for {
 			conn, err := c.listener.Accept()
 			if err != nil {
@@ -408,6 +430,53 @@ func (c *Connector) serveSSHCygwinSocket() error {
 				defer conn.Close()
 				id := time.Now().UnixNano() // create unique id for debug tracing
 				log.Printf("[%d] Accepted request from %s", id, socketName)
+				if err := serveSSH(id, conn, c.locked); err != nil {
+					log.Printf("[%d] SSH handler returned error: %s", id, err.Error())
+				}
+			}()
+		}
+	}()
+	return nil
+}
+
+func (c *Connector) serveXAgentSocket() error {
+
+	if c == nil {
+		return fmt.Errorf("gpg agent has not been initialized properly")
+	}
+
+	var err error
+	c.listener, err = net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return fmt.Errorf("could not open xagent socket: %w", err)
+	}
+
+	cookie := c.Name()
+	port := c.listener.Addr().(*net.TCPAddr).Port
+	c.xa, err = util.AdvertiseXAgent(cookie, port)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		log.Printf("Serving %s on :%d with cookie: %s", c.index, port, cookie)
+		for {
+			conn, err := c.listener.Accept()
+			if err != nil {
+				if !util.IsNetClosing(err) {
+					log.Printf("Quiting - unable to serve on xagent socket: %s", err)
+				}
+				return
+			}
+			if err = util.XAgentPerformHandshake(conn, cookie); err != nil {
+				log.Printf("Unable to perform handshake on xagent socket: %s", err)
+			}
+			c.wg.Add(1)
+			go func() {
+				defer c.wg.Done()
+				defer conn.Close()
+				id := time.Now().UnixNano() // create unique id for debug tracing
+				log.Printf("[%d] Accepted request from %s", id, cookie)
 				if err := serveSSH(id, conn, c.locked); err != nil {
 					log.Printf("[%d] SSH handler returned error: %s", id, err.Error())
 				}

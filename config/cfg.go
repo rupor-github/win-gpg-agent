@@ -47,6 +47,7 @@ type GUIConfig struct {
 	ExtraPort         int             `yaml:"extra_port,omitempty"`
 	Home              string          `yaml:"homedir,omitempty"`
 	Deadline          time.Duration   `yaml:"deadline,omitempty"`
+	XAgentCookieSize  int             `yaml:"xagent_cookie_size,omitempty"`
 	PinDlg            util.DlgDetails `yaml:"pin_dialog,omitempty"`
 	Clp               CLPConfig       `yaml:"gclpr,omitempty"`
 }
@@ -58,6 +59,7 @@ gui:
   openssh: windows
   ignore_session_lock: false
   deadline: 1m
+  xagent_cookie_size: 16
   pipe_name: %s
   homedir: "${LOCALAPPDATA}\\gnupg\\%s"
   gclpr:
@@ -98,6 +100,13 @@ func Load(fnames ...string) (*Config, error) {
 	}
 	if err := provider.Get("gpg").Populate(&cfg.GPG); err != nil {
 		return nil, err
+	}
+
+	if cfg.GUI.XAgentCookieSize < 0 {
+		cfg.GUI.XAgentCookieSize = 0
+	}
+	if cfg.GUI.XAgentCookieSize > 32 {
+		cfg.GUI.XAgentCookieSize = 32
 	}
 
 	if filepath.Clean(cfg.GPG.Sockets) == filepath.Clean(cfg.GUI.Home) {

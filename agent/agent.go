@@ -78,6 +78,9 @@ func NewAgent(cfg *config.Config) (*Agent, error) {
 		// Since OpenSSH-Win32 does not yet know how to redirect unix sockets we have no choice but to make available this additional port on local host only
 		a.conns[ConnectorExtraPort] = NewConnector(ConnectorExtraPort, sdir, fmt.Sprintf("localhost:%d", a.Cfg.GUI.ExtraPort), util.SocketAgentExtraName, locked, &a.wg)
 	}
+	if a.Cfg.GUI.XAgentCookieSize > 0 {
+		a.conns[ConnectorXShell] = NewConnector(ConnectorXShell, "", "", util.XAgentCookieString(a.Cfg.GUI.XAgentCookieSize), locked, &a.wg)
+	}
 
 	util.WaitForFileDeparture(time.Second*5,
 		a.conns[ConnectorSockAgent].PathGPG(),
@@ -105,6 +108,9 @@ func (a *Agent) Status() string {
 	}
 	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui AF_UNIX and Cygwin sockets directory:\n---------------------------\n%s", a.Cfg.GUI.Home)
 	fmt.Fprintf(&buf, "\n\n---------------------------\nagent-gui SSH named pipe:\n---------------------------\n%s", a.Cfg.GUI.PipeName)
+	if a.Cfg.GUI.XAgentCookieSize > 0 {
+		fmt.Fprintf(&buf, "\n\n---------------------------\ngpg-agent XAgent protocol socket on TCP:\n---------------------------\nlocalhost:%d", a.conns[ConnectorXShell].Port())
+	}
 
 	return buf.String()
 }

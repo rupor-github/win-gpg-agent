@@ -28,7 +28,7 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 **COMPATIBILITY NOTICE:** tools from this project were tested on Windows 10 and Windows 11 with multiple distributions and should work on anything starting with build 1809 - beginning with insider build 17063 and would not work on older versions of Windows 10, because it requires [AF_UNIX socket support](https://devblogs.microsoft.com/commandline/af_unix-comes-to-windows/) feature. I started testing everything with "official" GnuPG LTS Windows build 2.2.27.
 
 **BREAKING CHANGES:**
-* v1.4.0 changes default configuration values to support installation of 2.3+ GnuPG in non-portable mode. This requred changing default `gui.homedir` and introducing `gpg.socketdir` to avoid `gpg-agent` sockets being overwritten by `agent-gui` due to name conflict. This change may require adjusting your configuration and usage scripts.
+* v1.4.0 changes default configuration values to support installation of 2.3+ GnuPG in non-portable mode. This required changing default `gui.homedir` and introducing `gpg.socketdir` to avoid `gpg-agent` sockets being overwritten by `agent-gui` due to name conflict. This change may require adjusting your configuration and usage scripts.
 
 ## Installation
 
@@ -138,6 +138,7 @@ gui:
   openssh: native
   ignore_session_lock: false
   deadline: 1m
+  xagent_cookie_size: 16
   pipe_name: "\\\\.\\pipe\\openssh-ssh-agent"
   homedir: "${LOCALAPPDATA}\\gnupg\\agent-gui"
   gclpr:
@@ -156,6 +157,7 @@ Full list of configuration keys:
 * `gui.setenv` - automatically prepare environment variables
 * `gui.openssh` - when value is `cygwin` set environment `SSH_AUTH_SOCK` on Windows side to point to Cygwin socket file rather then named pipe, so Cygwin and MSYS2 ssh build could be used by default instead of what comes with Windows.
 * `gui.extra_port` - Win32-OpenSSH does not know how to redirect unix sockets yet, so if you want to use windows native ssh to remote "S.gpg-agent.extra" specify some non-zero port here. Program will open this port on localhost and you can use socat on the other side to recreate domain socket. By default it is disabled
+* `gui.xagent_cookie_size` - Size of the cookie used to perform XAgent protocol handshake. If set to 0 XAgent server would not be started at all. See [XShell](https://netsarang.atlassian.net/wiki/spaces/ENSUP/pages/419957237/Using+Xagent) for details.
 * `gui.ignore_session_lock` - continue to serve requests even if user session is locked
 * `gui.pipe_name` - full name of pipe for Windows OpenSSH
 * `gui.homedir` - directory to be used by agent-gui to create sockets in

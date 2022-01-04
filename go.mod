@@ -12,6 +12,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/config v1.4.0
 	go.uber.org/multierr v1.7.0
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c
 	honnef.co/go/tools v0.2.1
 )
@@ -24,7 +25,6 @@ require (
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/stretchr/objx v0.1.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de // indirect
 	golang.org/x/mod v0.3.0 // indirect
 	golang.org/x/text v0.3.3 // indirect

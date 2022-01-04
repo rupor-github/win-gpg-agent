@@ -149,6 +149,14 @@ func run() error {
 	// socket (WSL). NOTE: WSL2 requires additional layer of translation using socat on Linux side and either HYPER-V socket server or helper on Windows end
 	// since AF_UNIX interop is not (yet? ever?) implemented.
 
+	// Transact on local TCP socket for XAgent protocol
+	if gpgAgent.Cfg.GUI.XAgentCookieSize > 0 {
+		if err := gpgAgent.Serve(agent.ConnectorXShell); err != nil {
+			return err
+		}
+		defer gpgAgent.Close(agent.ConnectorXShell)
+	}
+
 	// Transact on Cygwin socket for ssh Cygwin/MSYS ports
 	if err := gpgAgent.Serve(agent.ConnectorSockAgentCygwinSSH); err != nil {
 		return err
@@ -167,7 +175,7 @@ func run() error {
 	}
 	defer gpgAgent.Close(agent.ConnectorSockAgentSSH)
 
-	// Transact on local tcp ocket for gpg agent
+	// Transact on local tcp cocket for gpg agent
 	if gpgAgent.Cfg.GUI.ExtraPort != 0 {
 		if err := gpgAgent.Serve(agent.ConnectorExtraPort); err != nil {
 			return err
