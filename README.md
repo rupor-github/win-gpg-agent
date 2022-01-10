@@ -440,7 +440,7 @@ main() {
     esac
 }
 
-# Serve socket at path $1 relaying to windows AF_LINUX socket $2 through sorelay tool with args in $3
+# Serve socket at path $1 relaying to windows socket $2 through sorelay tool with args in $3 (UNIX or ASSUAN)
 # return 0 on successfully setup socat, outputs the PID
 sorelay() {
     log "Set up $1 as socket relaying to $2"
