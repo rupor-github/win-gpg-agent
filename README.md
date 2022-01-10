@@ -89,7 +89,7 @@ Or you may consider switching it to `win32-openssh` (installed as a Windows feat
 4. Run `agent-gui.exe`
 
 
-Here is a diagram to show simplified relationship between parts: ![protocol](docs/pic1.png)
+Here is a diagram to show simplified relationship between parts: ![protocol](docs/pic1.jpg)
 
 Unfortunately due to environment complexity it is difficult to provide simple step-by-step guide. I will try to explain what each piece does (as they could be used separately from each other) and then provide an example setup.
 
