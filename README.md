@@ -10,7 +10,7 @@
     <hr>
 </p>
 
-Recent Windows has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https:/github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects - [this is](https://github.com/lfit/itpol/blob/master/protecting-code-integrity.md) an excellent explanation of code integrity aspect). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux practically out of the box.
+Recent Windows has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https://github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects - [this is](https://github.com/lfit/itpol/blob/master/protecting-code-integrity.md) an excellent explanation of code integrity aspect). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux practically out of the box.
 
 Windows usage is a bit more problematic as we have to deal with various non-cooperating pieces: GnuPG win32 binaries are somewhat deficient, OpenSSH port integrated into Windows (console, terminal and all), Cygwin/MSYS2 ssh tools and WSL1 and WSL2 add challenges with specific binaries and different lifetime management requirements. Ideally we need to have Windows host to handle single set of secured keys (SSH and GPG) while transparently providing necessary interfaces to all other environments. This project aims to create simple set of tools to be combined with GnuPG binaries for Windows to do exactly that.
 
@@ -35,9 +35,10 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 ### Installing using Scoop
 
 ```powershell
-    scoop install https://github.com/rupor-github/win-gpg-agent/releases/latest/download/win-gpg-agent.json
+    scoop bucket add extras
+    scoop install win-gpg-agent
 ```
-#### updating
+#### Updating
 
 ```powershell
     scoop update win-gpg-agent
