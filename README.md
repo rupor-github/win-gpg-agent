@@ -35,9 +35,10 @@ your gpg-agent.* This is a fundamental feature of WSL; if you are not sure of wh
 ### Installing using Scoop
 
 ```powershell
-    scoop install https://github.com/rupor-github/win-gpg-agent/releases/latest/download/win-gpg-agent.json
+    scoop bucket add extras
+    scoop install win-gpg-agent
 ```
-#### updating
+#### Updating
 
 ```powershell
     scoop update win-gpg-agent
