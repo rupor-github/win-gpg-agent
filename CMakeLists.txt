@@ -56,7 +56,7 @@ endif()
 
 # Project version number
 set(PRJ_VERSION_Major "1")
-set(PRJ_VERSION_Minor "5")
+set(PRJ_VERSION_Minor "6")
 set(PRJ_VERSION_Patch "0")
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/.git" AND IS_DIRECTORY "${PROJECT_SOURCE_DIR}/.git")

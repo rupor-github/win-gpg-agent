@@ -138,18 +138,18 @@ func PromptForWindowsCredentials(details DlgDetails, errorMessage, description, 
 	}
 	uiInfo.Size = uint32(unsafe.Sizeof(uiInfo))
 
+	const optionName = "RememberCredential"
 	var (
 		inBuf, sizeOfInBuf = prepareAuthBuf(prompt)
 		outBuf             *uint8
 		sizeOfOutBuf       uint32
 		authPackage        uint32
-		saveFlag           int32
+		saveFlag           = int32(GetIntOption(optionName, 0))
 		dwFlags            = uint32(CREDUIWIN_DEFAULT)
 	)
 
 	if save {
 		dwFlags += CREDUIWIN_CHECKBOX
-		saveFlag = 1
 	}
 
 	r1, _, err := pPromptForWindowsCredentials.Call(
@@ -200,6 +200,9 @@ func PromptForWindowsCredentials(details DlgDetails, errorMessage, description, 
 
 	res := windows.UTF16ToString(szPassword)
 	windows.CoTaskMemFree(unsafe.Pointer(outBuf))
+
+	// Store checkbox state to be used later
+	SetIntOption(optionName, uint64(saveFlag))
 
 	return false, res, saveFlag != 0
 }

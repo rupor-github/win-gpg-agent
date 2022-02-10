@@ -192,6 +192,8 @@ If you let it - it will save passwords in Windows Credential Manager as "Generic
 
 ![protocol](docs/pic6.png)
 
+Please, note that starting with 1.6.0 "Remember me" check box will initially be unchecked (previously it was always checked) and pinentry will use its last used state next time.
+
 Configuration file is almost never needed, but just in case full path to configuration file could be provided on command line. If not program will look for `pinentry.conf` in the same directory where executable is. It is YAML file with following defaults:
 
 ```yaml
