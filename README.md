@@ -1,14 +1,10 @@
-<p align="center">
-    <h1 align="center">win-gpg-agent</h1>
-    <p align="center">
-		Simple set of tools to make working with GPG and SSH keys easier on Windows 10/11.
-    </p>
-    <p align="center">
-        <a href="https://pkg.go.dev/mod/github.com/rupor-github/win-gpg-agent/?tab=packages"><img alt="GoDoc" src="https://img.shields.io/badge/godoc-reference-blue.svg" /></a>
-        <a href="https://goreportcard.com/report/github.com/rupor-github/win-gpg-agent"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/rupor-github/win-gpg-agent" /></a>
-    </p>    
-    <hr>
-</p>
+<h1>   
+    <img src="docs/safe2.svg" style="vertical-align:middle; width:8%" align="absmiddle"/>
+    <span style="vertical-align:middle;">&nbsp;&nbsp;win-gpg-agent</span>
+</h1>
+
+### Simple set of tools to make working with GPG and SSH keys easier on Windows 10/11.
+[![GitHub Release](https://img.shields.io/github/release/rupor-github/win-gpg-agent.svg)](https://github.com/rupor-github/win-gpg-agent/releases)
 
 Recent Windows has `ssh-agent` service (with support for persistence and Windows security) and I have been using it [successfully](https://github.com/rupor-github/wsl-ssh-agent) for a while. However there is another set of tools entirely - [GnuPG](https://gnupg.org/). It implements `ssh-agent` functionality (with somewhat more flexibility than original), supports smart cards, attempts to handle identity aspects of security and sometimes *must* be used (for example to sign git commits on some projects - [this is](https://github.com/lfit/itpol/blob/master/protecting-code-integrity.md) an excellent explanation of code integrity aspect). All of that works [reasonably well](https://eklitzke.org/using-gpg-agent-effectively) on Linux practically out of the box.
 
