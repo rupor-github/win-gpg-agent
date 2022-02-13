@@ -55,9 +55,12 @@ Download archive from the [releases page](https://github.com/rupor-github/win-gp
 ```
 
 
-**NOTE** Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq
+**NOTE** Starting with v1.2.2 releases are packed with zip and signed with [minisign](https://jedisct1.github.io/minisign/). Here is public key for verification: 
 
-![key](docs/build_key.png)
+<p>   
+    <img src="docs/build_key.svg" style="vertical-align:middle; width:15%" align="absmiddle"/>
+    <span style="vertical-align:middle;">&nbsp;&nbsp;RWTNh1aN8DrXq26YRmWO3bPBx4m8jBATGXt4Z96DF4OVSzdCBmoAU+Vq</span>
+</p>
 
 ## Usage
 
@@ -111,13 +114,13 @@ Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime ma
 - make sure that gpg-agent will use `pinentry.exe` from the same directory where agent-gui.exe is.
 - make sure that it functions by communicating with it.
 - create AF_UNIX socket counterparts for Assuan sockets from gpg-agent (except "browser" and "ssh" ones) and handle translation. I have no use for "browser" and S.gpg-agent.ssh presently does not work on Windows.
-- create and service named pipe for Windows native OpenSSH. Note, that OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
-- create and service Cygwin socket for Cygwin/MSYS2 build of OpenSSH. Note, that OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
-- Prepare TCP socket to service XAgent protocol and make it properly discoverable by XShell (create necessary windows etc). Note, that socket will be using pageant protocol to talk to gpg-agent.
+- create and service named pipe for Windows native OpenSSH. **NOTE** OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
+- create and service Cygwin socket for Cygwin/MSYS2 build of OpenSSH. **NOTE** OpenSSH (native and Cygwin) and AF_UNIX socket and named pipe are using pageant protocol to talk to gpg-agent.
+- Prepare TCP socket to service XAgent protocol and make it properly discoverable by XShell (create necessary windows etc). **NOTE** Socket will be using pageant protocol to talk to gpg-agent.
 - create and service tcp socket on "localhost:extra_port" for Win32-OpenSSH redirection (it does not presently supports unix socket redirection). This requres configuration and is disabled out of the box.
 - set environment variable `SSH_AUTH_SOCK` on Windows side to point either to pipe name so native OpenSSH tools know where to go or to Cygwin socket file to be used with Cygwin/MSYS2 ssh binaries.
 - create `WIN_GNUPG_HOME`, `WSL_GNUPG_HOME`, `WIN_GNUPG_SOCKETS`, `WSL_GNUPG_SOCKETS`, `WIN_AGENT_HOME`, `WSL_AGENT_HOME` environment variables, setting them to point to directories with Assuan sockets and AF_UNIX sockets and register those environment variables with WSLENV for path translation. Basically WSL_* would be paths on the Linux side and WIN_* are Windows ones. This way every WSL environment started after will have proper "unix" and "windows" paths available for easy scripting.
-- serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool (NOTE: starting with v1.1.0 gclpr server backend enforces protocol versioning and may require upgrade of gclpr).
+- serve as a backend for [gclpr](https://github.com/rupor-github/gclpr) remote clipboard tool. **NOTE** Starting with v1.1.0 gclpr server backend enforces protocol versioning and may require upgrade of gclpr.
 
 You could always see what is going on by clicking "Status" on applet's menu:
 
@@ -188,7 +191,7 @@ If you let it - it will save passwords in Windows Credential Manager as "Generic
 
 ![protocol](docs/pic6.png)
 
-Please, note that starting with 1.6.0 "Remember me" check box will initially be unchecked (previously it was always checked) and pinentry will use its last used state next time.
+**NOTE** Starting with 1.6.0 "Remember me" check box will initially be unchecked (previously it was always checked) and pinentry will use its last used state next time.
 
 Configuration file is almost never needed, but just in case full path to configuration file could be provided on command line. If not program will look for `pinentry.conf` in the same directory where executable is. It is YAML file with following defaults:
 
@@ -286,7 +289,7 @@ In my .bashrc I detect what I have and where it runs using code like this:
     fi
 ```
 
-Where [win-gpg-agent-relay](docs/win-gpg-agent-relay) is heavily based on the work of others (note it is for Debian based distros only!)
+Where [win-gpg-agent-relay](docs/win-gpg-agent-relay) is heavily based on the work of others **NOTE** It is for Debian based distros only!
 
 My `.ssh/config` entries used to `ssh` to `remote` have port forwarding enabled for `gclpr`:
 ```
