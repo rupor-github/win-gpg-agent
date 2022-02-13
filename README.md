@@ -89,7 +89,7 @@ Or you may consider switching it to `win32-openssh` (installed as a Windows feat
 4. Run `agent-gui.exe`
 
 
-Here is a diagram to show simplified relationship between parts: ![protocol](docs/pic1.png)
+Here is a diagram to show simplified relationship between parts: <img src="docs/pic1.png" style=" width:70% ; height:70% " alt="parts" >
 
 Unfortunately due to environment complexity it is difficult to provide simple step-by-step guide. I will try to explain what each piece does (as they could be used separately from each other) and then provide an example setup.
 
@@ -124,7 +124,7 @@ Is is a simple "notification tray" applet which does `gpg-agent.exe` lifetime ma
 
 You could always see what is going on by clicking "Status" on applet's menu:
 
-![protocol](docs/pic2.png)
+<img src="docs/pic2.png" style=" width:50% ; height:50% " alt="status" >
 
 Reasonable defaults are provided (but could be changed by using configuration file). Full path to configuration file could be provided on command line. If not program will look for `agent-gui.conf` in the same directory where executable is. It is YAML file with following defaults:
 
@@ -185,11 +185,11 @@ It is pretty mundane pinentry implementation, I tried to follow everything I cou
 
 I think it could be used as pinentry replacement on Windows even without agent-gui (for example to be called from WSL gpg if you decide to keep your vault there and ignore WIndows GnuPG completely) to show proper GUI dialogs:
 
-![protocol](docs/pic4.png) ![protocol](docs/pic5.png)
+<img src="docs/pic4.png" style=" width:50% ; height:50% " alt="one" ><img src="docs/pic5.png" style=" width:50% ; height:50% " alt="two" >
 
 If you let it - it will save passwords in Windows Credential Manager as "Generic Credentials" providing decent level of convenience and integration:
 
-![protocol](docs/pic6.png)
+<img src="docs/pic6.png" style=" width:50% ; height:50% " alt="three" >
 
 **NOTE** Starting with 1.6.0 "Remember me" check box will initially be unchecked (previously it was always checked) and pinentry will use its last used state next time.
 
