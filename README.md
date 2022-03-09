@@ -224,12 +224,12 @@ Usage: sorelay.exe [-adh] [-c path] [--version] path-to-socket
 
 This is helper program along the lines of John Starks' [npiperelay.exe](https://github.com/jstarks/npiperelay). Put it somewhere on devfs for interop to work its magic and combine with socat on WSL2 side and you could easily convert both Windows Assuan and Windows AF_UNIX sockets into sockets on WSL2 Linux end.
 
-As an example (with proper path) following will translate Windows side Assuan socket:
+As an example (use your path and proper escaping) following will translate Windows side Assuan socket:
 ```bash
 ( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe -a c\:/Users/mike0/AppData/Local/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
 ```
 
-And this (with proper path) will translate Windows side AF_UNIX socket:
+And this (use your path and proper escaping) will translate Windows side AF_UNIX socket:
 ```bash
 ( setsid socat UNIX-LISTEN:/home/rupor/.gnupg/S.gpg-agent,fork EXEC:"${HOME}/winhome/.wsl/sorelay.exe c\:/Users/mike0/AppData/Local/gnupg/S.gpg-agent",nofork & ) >/dev/null 2>&1
 ```
