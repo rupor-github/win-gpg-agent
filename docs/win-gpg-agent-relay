@@ -4,6 +4,9 @@
 #   https://gist.github.com/andsens/2ebd7b46c9712ac205267136dc677ac1
 #   https://gist.github.com/Nimamoh/e2df2ba0a99ef221d8cca360c931e5e6
 
+# For debugging startup problems uncomment next line
+# exec 2> >(tee -a -i "$HOME/error.log")
+
 GNUPGHOME="$HOME/.gnupg"
 
 if [ ! -d ${GNUPGHOME} ]; then
@@ -158,30 +161,41 @@ relay() {
         echo "KILLAGENT" | gpg-connect-agent >/dev/null 2>&1
     fi
 
-    if [ -f "$PIDFILE" ]; then
-        if ! pgrep "^win-gpg-agent-r$"; then
-            # wsl has been shutdown ungracefully, leaving garbage behind
-            rm "$PIDFILE" "$HOME/.gnupg/S.gpg-agent" "$HOME/.gnupg/S.gpg-agent.extra" "$HOME/.gnupg/S.gpg-agent.ssh"
-        fi
+    if [ -e "$HOME/.gnupg/S.gpg-agent" ] || [ -e "$HOME/.gnupg/S.gpg-agent.extra" ] || [ -e "$HOME/.gnupg/S.gpg-agent.ssh" ]; then
+        log "WSL has been shutdown ungracefully, leaving garbage behind"
+        rm "$HOME/.gnupg/S.gpg-agent" "$HOME/.gnupg/S.gpg-agent.extra" "$HOME/.gnupg/S.gpg-agent.ssh"
     fi
 
     socat UNIX-LISTEN:"\"$HOME/.gnupg/S.gpg-agent\"",fork EXEC:"\"\'$SORELAY_BIN\' -a \'$GPG_AGENT_SOCK\'\"",nofork 1>/dev/null 2>&1 &
     SOCAT_GPG_AGENT_PID="$!"
+    if ! is_pid_running "$SOCAT_GPG_AGENT_PID"; then
+        log "socat $SOCAT_GPG_AGENT_PID failed"
+        return 1
+    fi
     log "socat running with PID: $SOCAT_GPG_AGENT_PID"
 
     socat UNIX-LISTEN:"\"$HOME/.gnupg/S.gpg-agent.extra\"",fork EXEC:"\"\'$SORELAY_BIN\' -a \'$GPG_AGENT_EXTRA_SOCK\'\"",nofork 1>/dev/null 2>&1 &
     SOCAT_GPG_AGENT_EXTRA_PID="$!"
+    if ! is_pid_running "$SOCAT_GPG_AGENT_EXTRA_PID"; then
+        log "socat $SOCAT_GPG_AGENT_EXTRA_PID failed"
+        return 1
+    fi
     log "socat running with PID: $SOCAT_GPG_AGENT_EXTRA_PID"
 
     socat UNIX-LISTEN:"\"$HOME/.gnupg/S.gpg-agent.ssh\"",fork EXEC:"\"\'$SORELAY_BIN\' \'$GPG_AGENT_SSH_SOCK\'\"",nofork 1>/dev/null 2>&1 &
     SOCAT_GPG_AGENT_SSH_PID="$!"
+    if ! is_pid_running "$SOCAT_GPG_AGENT_SSH_PID"; then
+        log "socat $SOCAT_GPG_AGENT_SSH_PID failed"
+        return 1
+    fi
     log "socat running with PID: $SOCAT_GPG_AGENT_SSH_PID"
+
+    log -n "Polling remote ssh-agent..."
+    SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh" ssh-add -L >/dev/null 2>&1 || die "[$?] Failure communicating with ssh-agent"
+    log "OK"
 
     log -n "Polling remote gpg-agent... "
     gpg-connect-agent /bye >/dev/null 2>&1 || die "[$?] Failure communicating with gpg-agent"
-    log "OK"
-    log -n "Polling remote ssh-agent..."
-    SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh" ssh-add -L >/dev/null 2>&1 || die "[$?] Failure communicating with ssh-agent"
     log "OK"
 
     # Everything checks, we are ready for actions
