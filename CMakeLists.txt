@@ -223,7 +223,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     add_custom_target(deps_tidy
         SOURCES ${PROJECT_SOURCE_DIR}/go.mod
-        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod tidy -go=${GO_MIN_REQURED_VERSION}
+        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod tidy -compat=${GO_MIN_REQURED_VERSION}
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
         COMMENT "Cleaning dependencies (go mod tidy)"
         VERBATIM)
@@ -235,16 +235,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         COMMENT "Downloading dependencies (go mod download)"
         VERBATIM)
 
-    add_custom_target(deps_print
-        SOURCES ${PROJECT_SOURCE_DIR}/go.mod
-        COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod graph -go=${GO_MIN_REQURED_VERSION}
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        COMMENT "Printing dependencies (go mod graph)")
-
     add_custom_target(deps_vendor
         SOURCES ${PROJECT_SOURCE_DIR}/go.mod
         COMMAND ${GO_ENV} ${GO_EXECUTABLE} mod vendor
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
         COMMENT "Creating vendor directory (go mod vendor)"
         VERBATIM)
+
 endif()
