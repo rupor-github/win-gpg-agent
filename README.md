@@ -274,14 +274,14 @@ In my .bashrc I detect what I have and where it runs using code like this:
 
 ```bash
     # detect what we have
-    if [  $(uname -a | grep -c "Microsoft") -eq 1 ]; then
+    if uname -a | grep -q Microsoft; then
         # WSL 1 could use AF_UNIX sockets from Windows side directly
-        if [ -n ${WSL_AGENT_HOME} ]; then
+        if [ "${WSL_AGENT_HOME}" ]; then
             export GNUPGHOME=${WSL_AGENT_HOME}
             export SSH_AUTH_SOCK=${WSL_AGENT_HOME}/S.gpg-agent.ssh
         fi
-    elif [ $(uname -a | grep -c "microsoft") -eq 1 ]; then
-        # WSL 1 needs help form socat/sorelay
+    elif uname -a | grep -q microsoft; then
+        # WSL 2 needs help from socat/sorelay
         ${HOME}/.local/bin/win-gpg-agent-relay start
         export SSH_AUTH_SOCK=${HOME}/.gnupg/S.gpg-agent.ssh
     else
