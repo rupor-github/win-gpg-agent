@@ -191,7 +191,13 @@ relay() {
     log "socat running with PID: $SOCAT_GPG_AGENT_SSH_PID"
 
     log -n "Polling remote ssh-agent..."
-    SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh" ssh-add -L >/dev/null 2>&1 || die "[$?] Failure communicating with ssh-agent"
+    res=`SSH_AUTH_SOCK="$HOME/.gnupg/S.gpg-agent.ssh" ssh-add -L 2>&1`
+    if [ "$?" -ne 0 ]; then
+        # When hardware smartcard is used to keep private keys gpg will report no identities here
+        if ! echo "${res}" | grep -q "The agent has no identities"; then
+            die "Failure communicating with ssh-agent"
+        fi
+    fi
     log "OK"
 
     log -n "Polling remote gpg-agent... "
